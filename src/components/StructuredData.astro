@@ -1,0 +1,51 @@
+---
+export interface Props {
+  type: 'website' | 'article'
+  title: string
+  description: string
+  url?: string
+  image?: string
+  datePublished?: string
+  dateModified?: string
+  author?: string
+}
+
+const {
+  type,
+  title,
+  description,
+  url,
+  image,
+  datePublished,
+  dateModified,
+  author = '三浦 海の学校'
+} = Astro.props
+
+const baseData = {
+  '@context': 'https://schema.org',
+  '@type': type === 'website' ? 'WebSite' : 'Article',
+  name: title,
+  description: description,
+  url: url || Astro.url.href,
+  publisher: {
+    '@type': 'Organization',
+    name: '三浦 海の学校',
+    url: 'https://miura-diving.com'
+  }
+}
+
+const articleData = type === 'article' ? {
+  headline: title,
+  image: image,
+  datePublished: datePublished,
+  dateModified: dateModified || datePublished,
+  author: {
+    '@type': 'Organization',
+    name: author
+  }
+} : {}
+
+const structuredData = { ...baseData, ...articleData }
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>

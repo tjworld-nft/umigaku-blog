@@ -1,11 +1,86 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { getPosts } from '../lib/sanityClient'
+import type { Post } from '../types/Post'
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+let posts: Post[] = []
+let error = ''
+
+try {
+  posts = await getPosts()
+} catch (err) {
+  error = '記事の取得に失敗しました'
+  console.error('Error fetching posts:', err)
+}
+
+// 画像URLを生成する関数
+function getImageUrl(imageRef: string, projectId: string, dataset: string) {
+  return `https://cdn.sanity.io/images/${projectId}/${dataset}/${imageRef.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp')}`
+}
+
+// 日付フォーマット関数
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString('ja-JP')
+}
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<BaseLayout title="三浦 海の学校のブログ - 最新記事" description="三浦 海の学校のブログの最新記事をご覧ください。ダイビング、マリンアクティビティの情報を発信しています。">
+  {error ? (
+    <div class="text-center py-12">
+      <p class="text-red-600 text-lg">{error}</p>
+    </div>
+  ) : posts.length === 0 ? (
+    <div class="text-center py-12">
+      <p class="text-gray-600 text-lg">まだ記事がありません</p>
+    </div>
+  ) : (
+    <>
+      <h1 class="text-3xl font-bold text-gray-900 mb-8">最新記事</h1>
+      <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+        {posts.slice(0, 10).map((post) => (
+          <div class="max-w-3xl mx-auto">
+            <article class="w-full bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            {post.mainImage && (
+              <div class="aspect-video bg-gray-200">
+                <img
+                  src={getImageUrl(post.mainImage.asset._ref, import.meta.env.SANITY_PROJECT_ID, import.meta.env.SANITY_DATASET)}
+                  alt={post.title}
+                  class="w-full h-full object-cover rounded-t-lg"
+                />
+              </div>
+            )}
+            <div class="p-6">
+              <h2 class="text-xl font-bold mb-2 line-clamp-2">
+                <a
+                  href={`/blog/${post.slug}`}
+                  class="text-gray-900 hover:text-blue-600 transition-colors"
+                >
+                  {post.title}
+                </a>
+              </h2>
+              <p class="text-gray-600 text-sm mb-4">
+                {formatDate(post.publishedAt || post._createdAt)}
+              </p>
+              <a
+                href={`/blog/${post.slug}`}
+                class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+              >
+                続きを読む
+              </a>
+            </div>
+            </article>
+          </div>
+        ))}
+      </div>
+    </>
+  )}
+</BaseLayout>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

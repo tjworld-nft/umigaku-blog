@@ -1,0 +1,51 @@
+name: Deploy Blog to Server
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+  
+  # Sanity webhook trigger
+  repository_dispatch:
+    types: [sanity-update]
+  
+  # Push to main branch
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build site
+      run: npm run build
+      env:
+        SANITY_PROJECT_ID: ${{ secrets.SANITY_PROJECT_ID }}
+        SANITY_DATASET: ${{ secrets.SANITY_DATASET }}
+        SANITY_API_VERSION: ${{ secrets.SANITY_API_VERSION }}
+        SANITY_READ_TOKEN: ${{ secrets.SANITY_READ_TOKEN }}
+        
+    - name: Deploy to server via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./dist/
+        server-dir: /public_html/blog/
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**

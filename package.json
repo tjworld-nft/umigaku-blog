@@ -9,6 +9,11 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.10.1"
+    "@portabletext/to-html": "^2.0.14",
+    "@sanity/client": "^7.6.0",
+    "@tailwindcss/typography": "^0.5.16",
+    "@tailwindcss/vite": "^4.1.11",
+    "astro": "^5.10.1",
+    "tailwindcss": "^4.1.11"
   }
 }

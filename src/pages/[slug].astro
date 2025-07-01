@@ -1,0 +1,167 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { getPost, getPosts } from '../lib/sanityClient'
+import { toHTML } from '@portabletext/to-html'
+import type { Post } from '../types/Post'
+
+export async function getStaticPaths() {
+  const posts = await getPosts()
+  return posts.map((post: Post) => ({
+    params: { slug: post.slug },
+  }))
+}
+
+const { slug } = Astro.params
+
+let post: Post | null = null
+let error = ''
+
+try {
+  post = await getPost(slug)
+  if (!post) {
+    error = '記事が見つかりません'
+  }
+} catch (err) {
+  error = '記事の取得に失敗しました'
+  console.error('Error fetching post:', err)
+}
+
+// 画像URLを生成する関数
+function getImageUrl(imageRef: string, projectId: string, dataset: string) {
+  return `https://cdn.sanity.io/images/${projectId}/${dataset}/${imageRef.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp')}`
+}
+
+// 日付フォーマット関数
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString('ja-JP', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+// Portable Text を HTML に変換
+const bodyHTML = post?.body ? toHTML(post.body, {
+  components: {
+    types: {
+      image: ({ value }) => {
+        const imageUrl = getImageUrl(value.asset._ref, import.meta.env.SANITY_PROJECT_ID, import.meta.env.SANITY_DATASET)
+        return `<img src="${imageUrl}" alt="${value.alt || ''}" class="w-full h-auto rounded-lg my-4" />`
+      }
+    }
+  }
+}) : ''
+
+const pageTitle = post ? `${post.title} - 三浦 海の学校のブログ` : '記事が見つかりません'
+const pageDescription = post ? `${post.title}の記事です。三浦 海の学校のブログより` : ''
+const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, import.meta.env.SANITY_PROJECT_ID, import.meta.env.SANITY_DATASET) : undefined
+---
+
+<BaseLayout 
+  title={pageTitle} 
+  description={pageDescription} 
+  image={pageImage}
+  type="article"
+  datePublished={post?.publishedAt || post?._createdAt}
+  dateModified={post?._createdAt}
+>
+  {error || !post ? (
+    <div class="text-center py-12">
+      <p class="text-red-600 text-lg mb-4">{error || '記事が見つかりません'}</p>
+      <a href="/blog/" class="text-blue-600 hover:underline">
+        ホームに戻る
+      </a>
+    </div>
+  ) : (
+    <>
+      <article class="bg-white rounded-lg shadow-lg overflow-hidden">
+        {post.mainImage && (
+          <div class="aspect-video bg-gray-200">
+            <img
+              src={getImageUrl(post.mainImage.asset._ref, import.meta.env.SANITY_PROJECT_ID, import.meta.env.SANITY_DATASET)}
+              alt={post.title}
+              class="w-full h-full object-cover"
+            />
+          </div>
+        )}
+        
+        <div class="p-8">
+          <h1 class="text-4xl font-bold text-gray-900 mb-4">
+            {post.title}
+          </h1>
+          
+          <div class="flex items-center text-gray-600 text-sm mb-8">
+            <time datetime={post.publishedAt || post._createdAt}>
+              {formatDate(post.publishedAt || post._createdAt)}
+            </time>
+          </div>
+
+          <div class="prose max-w-none mx-auto" set:html={bodyHTML}>
+          </div>
+        </div>
+      </article>
+
+      <div class="mt-8 text-center">
+        <a
+          href="/blog/"
+          class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          記事一覧に戻る
+        </a>
+      </div>
+    </>
+  )}
+</BaseLayout>
+
+<style>
+  .prose {
+    color: #374151;
+    max-width: 65ch;
+  }
+
+  .prose h1 {
+    color: #111827;
+    font-weight: 800;
+    font-size: 2.25rem;
+    margin-top: 0;
+    margin-bottom: 0.8888889em;
+    line-height: 1.1111111;
+  }
+
+  .prose h2 {
+    color: #111827;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-top: 2em;
+    margin-bottom: 1em;
+    line-height: 1.3333333;
+  }
+
+  .prose h3 {
+    color: #111827;
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin-top: 1.6em;
+    margin-bottom: 0.6em;
+    line-height: 1.6;
+  }
+
+  .prose p {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+  }
+
+  .prose img {
+    margin-top: 2em;
+    margin-bottom: 2em;
+  }
+
+  .prose-lg {
+    font-size: 1.125rem;
+    line-height: 1.7777778;
+  }
+
+  .max-w-none {
+    max-width: none;
+  }
+</style>

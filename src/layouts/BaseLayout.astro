@@ -1,0 +1,118 @@
+---
+import StructuredData from '../components/StructuredData.astro'
+import '../styles/global.css'
+
+export interface Props {
+  title?: string
+  description?: string
+  image?: string
+  type?: 'website' | 'article'
+  datePublished?: string
+  dateModified?: string
+}
+
+const { 
+  title = '三浦 海の学校のブログ', 
+  description = 'ダイビング、マリンアクティビティの最新情報をお届けします', 
+  image,
+  type = 'website',
+  datePublished,
+  dateModified
+} = Astro.props
+---
+
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/blog/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {image && <meta property="og:image" content={image} />}
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={Astro.url} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    {image && <meta property="twitter:image" content={image} />}
+    
+    <!-- Structured Data -->
+    <StructuredData
+      type={type}
+      title={title}
+      description={description}
+      url={Astro.url.href}
+      image={image}
+      datePublished={datePublished}
+      dateModified={dateModified}
+    />
+  </head>
+  <body class="bg-gray-50 text-gray-800 leading-relaxed">
+    <!-- Header -->
+    <header class="bg-white shadow sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto flex justify-between items-center px-6 py-3">
+        <a href="/blog/" class="text-xl font-bold tracking-wide">三浦 海の学校のブログ</a>
+        <nav class="space-x-6 text-sm font-medium">
+          <a href="/"                 class="hover:text-sky-600">ホーム</a>
+          <a href="/license/"         class="hover:text-sky-600">ライセンス</a>
+          <a href="/fun-diving/"      class="hover:text-sky-600">ファンダイビング</a>
+          <a href="/marine-activity/" class="hover:text-sky-600">マリンアクティビティ</a>
+          <a href="/contact/"         class="hover:text-sky-600">お問い合わせ</a>
+          <a href="/blog/"            class="hover:text-sky-600">ブログ</a>
+        </nav>
+        
+        <!-- Mobile menu button -->
+        <button class="md:hidden flex flex-col space-y-1" id="mobile-menu-button">
+          <span class="w-6 h-0.5 bg-gray-600"></span>
+          <span class="w-6 h-0.5 bg-gray-600"></span>
+          <span class="w-6 h-0.5 bg-gray-600"></span>
+        </button>
+      </div>
+      
+      <!-- Mobile menu -->
+      <div class="md:hidden bg-white border-t hidden" id="mobile-menu">
+        <nav class="flex flex-col space-y-1 px-6 py-4">
+          <a href="/"                 class="hover:text-sky-600 py-2">ホーム</a>
+          <a href="/license/"         class="hover:text-sky-600 py-2">ライセンス</a>
+          <a href="/fun-diving/"      class="hover:text-sky-600 py-2">ファンダイビング</a>
+          <a href="/marine-activity/" class="hover:text-sky-600 py-2">マリンアクティビティ</a>
+          <a href="/contact/"         class="hover:text-sky-600 py-2">お問い合わせ</a>
+          <a href="/blog/"            class="hover:text-sky-600 py-2">ブログ</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="max-w-5xl mx-auto px-4 py-10 space-y-16">
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t mt-16">
+      <div class="max-w-6xl mx-auto px-6 py-8">
+        <div class="text-center text-sm text-gray-500">
+          © 2025 三浦 海の学校. All rights reserved.
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Mobile menu toggle
+      const mobileMenuButton = document.getElementById('mobile-menu-button');
+      const mobileMenu = document.getElementById('mobile-menu');
+      
+      mobileMenuButton?.addEventListener('click', () => {
+        mobileMenu?.classList.toggle('hidden');
+      });
+    </script>
+  </body>
+</html>

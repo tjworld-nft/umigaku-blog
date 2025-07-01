@@ -1,34 +1,81 @@
-# Astro Starter Kit: Basics
+# 三浦 海の学校のブログ
 
-```sh
-npm create astro@latest -- --template basics
+AstroとSanity CMSで構築された静的ブログサイト
+
+## 機能
+
+- ✅ Sanity CMSとの連携
+- ✅ 静的サイト生成 (SSG)
+- ✅ レスポンシブデザイン
+- ✅ SEO最適化
+- ✅ 構造化データ (JSON-LD)
+- ✅ Open Graph / Twitter Card
+- ✅ `/blog` サブディレクトリ対応
+
+## セットアップ
+
+1. 環境変数を設定:
+```bash
+cp .env.example .env
 ```
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
-
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── layouts/
-│   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
-└── package.json
+2. `.env` ファイルにSanityの設定を追加:
+```
+SANITY_PROJECT_ID=your_project_id
+SANITY_DATASET=production
+SANITY_API_VERSION=2025-02-19
+SANITY_READ_TOKEN=your_read_token
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+3. 依存関係のインストール:
+```bash
+npm install
+```
+
+4. 開発サーバー起動:
+```bash
+npm run dev
+```
+
+## ビルド & デプロイ
+
+1. 本番ビルド:
+```bash
+npm run build
+```
+
+2. `dist/` フォルダの中身を `public_html/blog/` にアップロード
+
+## ディレクトリ構造
+
+```
+src/
+├── layouts/
+│   └── BaseLayout.astro     # ベースレイアウト
+├── pages/
+│   ├── index.astro         # 記事一覧ページ
+│   └── [slug].astro        # 記事詳細ページ
+├── components/
+│   └── StructuredData.astro # 構造化データ
+├── lib/
+│   └── sanityClient.ts     # Sanity接続
+└── types/
+    └── Post.ts             # 型定義
+```
+
+## URL構造
+
+- ホーム: `/blog/`
+- 記事詳細: `/blog/{記事スラッグ}`
+
+## 外部リンク
+
+ヘッダーナビゲーションから以下にリンク:
+- https://miura-diving.com/ (ホーム)
+- https://miura-diving.com/license (ライセンス)
+- https://miura-diving.com/fundive (ファンダイビング)
+- https://miura-diving.com/activity (マリンアクティビティ)
+- https://miura-diving.com/contact (お問い合わせ)
 
 ## 🧞 Commands
 
@@ -42,7 +89,3 @@ All commands are run from the root of the project, from a terminal:
 | `npm run preview`         | Preview your build locally, before deploying     |
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
