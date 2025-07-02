@@ -74,7 +74,7 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
     </div>
   ) : (
     <>
-      <article class="bg-white rounded-lg shadow-lg overflow-hidden">
+      <article class="article-card rounded-lg shadow-lg overflow-hidden">
         {post.mainImage && (
           <div class="aspect-video bg-gray-200">
             <img
@@ -86,11 +86,11 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
         )}
         
         <div class="p-8">
-          <h1 class="text-4xl font-bold text-gray-900 mb-4">
+          <h1 class="text-4xl font-bold text-white mb-4">
             {post.title}
           </h1>
           
-          <div class="flex items-center text-gray-600 text-sm mb-8">
+          <div class="flex items-center text-cyan-200 text-sm mb-8">
             <time datetime={post.publishedAt || post._createdAt}>
               {formatDate(post.publishedAt || post._createdAt)}
             </time>
@@ -114,6 +114,13 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
 </BaseLayout>
 
 <style>
+  /* 記事カードの背景 */
+  .article-card {
+    background: rgba(0,30,60,0.9) !important;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(173,216,230,0.4);
+  }
+
   /* 読みやすさを向上させた記事スタイル */
   .readable-content {
     font-size: 1.125rem;
