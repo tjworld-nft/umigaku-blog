@@ -51,7 +51,7 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./dist/
-        server-dir: /public_html/blog/
+        server-dir: /miura-diving.com/public_html/blog/
         log-level: verbose
         exclude: |
           **/.git*
