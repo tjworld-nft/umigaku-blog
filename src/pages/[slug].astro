@@ -96,7 +96,7 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
             </time>
           </div>
 
-          <div class="prose max-w-none mx-auto" set:html={bodyHTML}>
+          <div class="prose max-w-none mx-auto readable-content" set:html={bodyHTML}>
           </div>
         </div>
       </article>
@@ -114,54 +114,118 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
 </BaseLayout>
 
 <style>
-  .prose {
-    color: #374151;
-    max-width: 65ch;
+  /* 読みやすさを向上させた記事スタイル */
+  .readable-content {
+    font-size: 1.125rem;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.95);
   }
 
-  .prose h1 {
-    color: #111827;
+  .readable-content p {
+    margin-top: 1.8em;
+    margin-bottom: 1.8em;
+    line-height: 1.9;
+  }
+
+  .readable-content h1 {
+    color: white !important;
     font-weight: 800;
-    font-size: 2.25rem;
-    margin-top: 0;
-    margin-bottom: 0.8888889em;
-    line-height: 1.1111111;
+    font-size: 2.5rem;
+    margin-top: 2.5em;
+    margin-bottom: 1.2em;
+    line-height: 1.3;
   }
 
-  .prose h2 {
-    color: #111827;
+  .readable-content h2 {
+    color: white !important;
     font-weight: 700;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
+    margin-top: 3em;
+    margin-bottom: 1.5em;
+    line-height: 1.4;
+    padding-top: 1em;
+    border-top: 1px solid rgba(173,216,230,0.3);
+  }
+
+  .readable-content h3 {
+    color: white !important;
+    font-weight: 600;
+    font-size: 1.4rem;
+    margin-top: 2.5em;
+    margin-bottom: 1.2em;
+    line-height: 1.5;
+  }
+
+  .readable-content h4, .readable-content h5, .readable-content h6 {
+    color: white !important;
+    font-weight: 600;
     margin-top: 2em;
     margin-bottom: 1em;
-    line-height: 1.3333333;
-  }
-
-  .prose h3 {
-    color: #111827;
-    font-weight: 600;
-    font-size: 1.25rem;
-    margin-top: 1.6em;
-    margin-bottom: 0.6em;
     line-height: 1.6;
   }
 
-  .prose p {
-    margin-top: 1.25em;
-    margin-bottom: 1.25em;
+  .readable-content ul, .readable-content ol {
+    margin-top: 1.8em;
+    margin-bottom: 1.8em;
+    padding-left: 1.5em;
   }
 
-  .prose img {
-    margin-top: 2em;
-    margin-bottom: 2em;
+  .readable-content li {
+    margin-top: 0.8em;
+    margin-bottom: 0.8em;
+    line-height: 1.8;
   }
 
-  .prose-lg {
-    font-size: 1.125rem;
-    line-height: 1.7777778;
+  .readable-content blockquote {
+    border-left: 4px solid rgba(173,216,230,0.5);
+    padding-left: 1.5em;
+    margin: 2.5em 0;
+    font-style: italic;
+    background: rgba(173,216,230,0.1);
+    padding: 1.5em;
+    border-radius: 8px;
   }
 
-  .max-w-none {
-    max-width: none;
+  .readable-content img {
+    margin-top: 3em;
+    margin-bottom: 3em;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  .readable-content a {
+    color: #7dd3fc !important;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .readable-content a:hover {
+    color: white !important;
+    text-decoration: none;
+  }
+
+  .readable-content code {
+    background: rgba(173,216,230,0.2);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+
+  .readable-content pre {
+    background: rgba(0,30,60,0.8);
+    padding: 1.5em;
+    border-radius: 8px;
+    margin: 2em 0;
+    overflow-x: auto;
+  }
+
+  .readable-content strong, .readable-content b {
+    font-weight: 700;
+    color: white;
+  }
+
+  .readable-content em, .readable-content i {
+    font-style: italic;
+    color: rgba(255,255,255,0.9);
   }
 </style>
