@@ -37,6 +37,13 @@ jobs:
         SANITY_API_VERSION: ${{ secrets.SANITY_API_VERSION }}
         SANITY_READ_TOKEN: ${{ secrets.SANITY_READ_TOKEN }}
         
+    - name: List files before deploy
+      run: |
+        echo "Files in dist directory:"
+        ls -la dist/
+        echo "HTML content preview:"
+        head -5 dist/index.html
+        
     - name: Deploy to server via FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
@@ -45,6 +52,7 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./dist/
         server-dir: /public_html/blog/
+        log-level: verbose
         exclude: |
           **/.git*
           **/.git*/**
