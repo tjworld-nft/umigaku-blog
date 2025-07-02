@@ -95,11 +95,11 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
         )}
         
         <div class="p-8">
-          <h1 class="text-4xl font-bold text-white mb-4">
+          <h1 class="text-4xl font-bold text-gray-900 mb-4">
             {post.title}
           </h1>
           
-          <div class="flex items-center text-cyan-200 text-sm mb-8">
+          <div class="flex items-center text-gray-600 text-sm mb-8">
             <time datetime={post.publishedAt || post._createdAt}>
               {formatDate(post.publishedAt || post._createdAt)}
             </time>
@@ -125,16 +125,17 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
 <style>
   /* 記事カードの背景 */
   .article-card {
-    background: rgba(0,30,60,0.9) !important;
+    background: rgba(255,255,255,0.95) !important;
     backdrop-filter: blur(15px);
     border: 1px solid rgba(173,216,230,0.4);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
   }
 
   /* 読みやすさを向上させた記事スタイル */
   .readable-content {
     font-size: 1.125rem;
     line-height: 1.8;
-    color: rgba(255,255,255,0.95);
+    color: #374151;
   }
 
   .readable-content p {
@@ -142,6 +143,7 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
     margin-bottom: 1.8em;
     line-height: 1.9;
     white-space: pre-line; /* 改行文字を反映 */
+    color: #1f2937;
   }
 
   /* 句読点や「。」の後に改行スペースを追加 */
@@ -152,7 +154,7 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
   }
 
   .readable-content h1 {
-    color: white !important;
+    color: #111827 !important;
     font-weight: 800;
     font-size: 2.5rem;
     margin-top: 2.5em;
@@ -161,18 +163,18 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
   }
 
   .readable-content h2 {
-    color: white !important;
+    color: #111827 !important;
     font-weight: 700;
     font-size: 1.8rem;
     margin-top: 3em;
     margin-bottom: 1.5em;
     line-height: 1.4;
     padding-top: 1em;
-    border-top: 1px solid rgba(173,216,230,0.3);
+    border-top: 2px solid #e5e7eb;
   }
 
   .readable-content h3 {
-    color: white !important;
+    color: #111827 !important;
     font-weight: 600;
     font-size: 1.4rem;
     margin-top: 2.5em;
@@ -181,7 +183,7 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
   }
 
   .readable-content h4, .readable-content h5, .readable-content h6 {
-    color: white !important;
+    color: #111827 !important;
     font-weight: 600;
     margin-top: 2em;
     margin-bottom: 1em;
@@ -198,45 +200,49 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
     margin-top: 0.8em;
     margin-bottom: 0.8em;
     line-height: 1.8;
+    color: #1f2937;
   }
 
   .readable-content blockquote {
-    border-left: 4px solid rgba(173,216,230,0.5);
+    border-left: 4px solid #3b82f6;
     padding-left: 1.5em;
     margin: 2.5em 0;
     font-style: italic;
-    background: rgba(173,216,230,0.1);
+    background: #f8fafc;
     padding: 1.5em;
     border-radius: 8px;
+    color: #475569;
   }
 
   .readable-content img {
     margin-top: 3em;
     margin-bottom: 3em;
     border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
   }
 
   .readable-content a {
-    color: #7dd3fc !important;
+    color: #2563eb !important;
     text-decoration: underline;
     text-underline-offset: 4px;
   }
 
   .readable-content a:hover {
-    color: white !important;
+    color: #1d4ed8 !important;
     text-decoration: none;
   }
 
   .readable-content code {
-    background: rgba(173,216,230,0.2);
+    background: #f1f5f9;
+    color: #475569;
     padding: 0.2em 0.4em;
     border-radius: 4px;
     font-size: 0.9em;
   }
 
   .readable-content pre {
-    background: rgba(0,30,60,0.8);
+    background: #1e293b;
+    color: #e2e8f0;
     padding: 1.5em;
     border-radius: 8px;
     margin: 2em 0;
@@ -245,11 +251,11 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
 
   .readable-content strong, .readable-content b {
     font-weight: 700;
-    color: white;
+    color: #111827;
   }
 
   .readable-content em, .readable-content i {
     font-style: italic;
-    color: rgba(255,255,255,0.9);
+    color: #374151;
   }
 </style>
