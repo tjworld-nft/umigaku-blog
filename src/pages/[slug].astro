@@ -41,7 +41,7 @@ function formatDate(dateString: string) {
 }
 
 // Portable Text を HTML に変換
-const bodyHTML = post?.body ? toHTML(post.body, {
+let bodyHTML = post?.body ? toHTML(post.body, {
   components: {
     types: {
       image: ({ value }) => {
@@ -51,6 +51,15 @@ const bodyHTML = post?.body ? toHTML(post.body, {
     }
   }
 }) : ''
+
+// 読みやすさのため、長い文章に改行を追加
+if (bodyHTML) {
+  bodyHTML = bodyHTML
+    .replace(/。\s*/g, '。<br><br>') // 句点の後に改行
+    .replace(/！\s*/g, '！<br><br>') // 感嘆符の後に改行
+    .replace(/？\s*/g, '？<br><br>') // 疑問符の後に改行
+    .replace(/([。！？])<br><br>(<\/p>)/g, '$1$2') // pタグ終了前の余分な改行を削除
+}
 
 const pageTitle = post ? `${post.title} - 三浦 海の学校のブログ` : '記事が見つかりません'
 const pageDescription = post ? `${post.title}の記事です。三浦 海の学校のブログより` : ''
@@ -132,6 +141,14 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
     margin-top: 1.8em;
     margin-bottom: 1.8em;
     line-height: 1.9;
+    white-space: pre-line; /* 改行文字を反映 */
+  }
+
+  /* 句読点や「。」の後に改行スペースを追加 */
+  .readable-content p::after {
+    content: "";
+    display: block;
+    height: 0.8em;
   }
 
   .readable-content h1 {
