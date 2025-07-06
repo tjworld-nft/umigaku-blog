@@ -5,6 +5,7 @@ import '../styles/global.css'
 export interface Props {
   title?: string
   description?: string
+  keywords?: string
   image?: string
   type?: 'website' | 'article'
   datePublished?: string
@@ -13,7 +14,8 @@ export interface Props {
 
 const { 
   title = '三浦 海の学校のブログ', 
-  description = 'ダイビング、マリンアクティビティの最新情報をお届けします', 
+  description = 'ダイビング、マリンアクティビティの最新情報をお届けします',
+  keywords,
   image,
   type = 'website',
   datePublished,
@@ -26,6 +28,7 @@ const {
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
+    {keywords && <meta name="keywords" content={keywords} />}
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/blog/favicon.svg" />
     <meta name="generator" content={Astro.generator} />

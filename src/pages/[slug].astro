@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { getPost, getPosts } from '../lib/sanityClient'
 import { toHTML } from '@portabletext/to-html'
+import { generateSEOData } from '../lib/seoGenerator'
 import type { Post } from '../types/Post'
 
 export async function getStaticPaths() {
@@ -61,14 +62,19 @@ if (bodyHTML) {
     .replace(/([。！？])<br><br>(<\/p>)/g, '$1$2') // pタグ終了前の余分な改行を削除
 }
 
-const pageTitle = post ? `${post.title} - 三浦 海の学校のブログ` : '記事が見つかりません'
-const pageDescription = post ? `${post.title}の記事です。三浦 海の学校のブログより` : ''
+// SEOデータを自動生成
+const seoData = post ? generateSEOData(post.title, post.body || []) : null
+
+const pageTitle = seoData ? seoData.ogTitle : '記事が見つかりません'
+const pageDescription = seoData ? seoData.metaDescription : ''
+const pageKeywords = seoData ? seoData.keywords.join(', ') : ''
 const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, import.meta.env.SANITY_PROJECT_ID, import.meta.env.SANITY_DATASET) : undefined
 ---
 
 <BaseLayout 
   title={pageTitle} 
-  description={pageDescription} 
+  description={pageDescription}
+  keywords={pageKeywords}
   image={pageImage}
   type="article"
   datePublished={post?.publishedAt || post?._createdAt}
