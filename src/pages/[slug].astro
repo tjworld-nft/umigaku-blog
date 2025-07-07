@@ -53,20 +53,23 @@ let bodyHTML = post?.body ? toHTML(post.body, {
   }
 }) : ''
 
-// 読みやすさのため、長い文章に改行を追加と「」問題の修正
+// 読みやすさのため、長い文章に改行を追加と「」問題の根本修正
 if (bodyHTML) {
   bodyHTML = bodyHTML
-    // 「」の前のあらゆる改行・空白パターンを削除
+    // 「」の前のあらゆる改行・空白・HTMLタグパターンを完全除去
+    .replace(/([！？。])\s*<\/p>\s*<p[^>]*>\s*」/g, '$1」')
+    .replace(/([^。！？])\s*<\/p>\s*<p[^>]*>\s*」/g, '$1」')
     .replace(/\s*<br\s*\/?>\s*<br\s*\/?>\s*」/g, '」')
-    .replace(/\s*<br\s*\/?>\s*」/g, '」') 
+    .replace(/\s*<br\s*\/?>\s*」/g, '」')
     .replace(/\s*<\/p>\s*<p[^>]*>\s*」/g, '」')
-    .replace(/([！？])\s*<\/p>\s*<p[^>]*>\s*」/g, '$1」')
-    // h2のモダンなスタイリング
-    .replace(/<h2>/g, '<h2 class="text-3xl font-bold mb-10 mt-16 text-gray-900 relative group">')
-    .replace(/<\/h2>/g, '<span class="absolute -bottom-2 left-0 w-16 h-1 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full group-hover:w-24 transition-all duration-300"></span></h2>')
-    // h3のモダンなスタイリング  
-    .replace(/<h3>/g, '<h3 class="text-2xl font-semibold mb-6 mt-12 text-gray-800 relative group">')
-    .replace(/<\/h3>/g, '<span class="absolute -bottom-1 left-0 w-12 h-0.5 bg-gradient-to-r from-teal-400 to-cyan-400 rounded-full group-hover:w-16 transition-all duration-300"></span></h3>')
+    .replace(/\n\s*」/g, '」')
+    .replace(/\s+」/g, '」')
+    // 超モダンな見出しデザイン
+    .replace(/<h2>/g, '<h2 class="text-4xl font-black mb-12 mt-20 text-slate-900 tracking-tight leading-tight relative after:content-[\'\'] after:absolute after:left-0 after:-bottom-4 after:w-20 after:h-1 after:bg-gradient-to-r after:from-emerald-400 after:via-cyan-500 after:to-blue-600 after:rounded-full after:shadow-lg">')
+    .replace(/<\/h2>/g, '</h2>')
+    // エレガントなh3デザイン  
+    .replace(/<h3>/g, '<h3 class="text-2xl font-bold mb-8 mt-14 text-slate-800 tracking-tight relative pl-4 before:content-[\'\'] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-gradient-to-b before:from-teal-400 before:to-cyan-600 before:rounded-full">')
+    .replace(/<\/h3>/g, '</h3>')
     // 通常の改行処理
     .replace(/。\s*/g, '。<br><br>') // 句点の後に改行
     .replace(/！\s*/g, '！<br><br>') // 感嘆符の後に改行
