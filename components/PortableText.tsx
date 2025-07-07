@@ -39,18 +39,26 @@ const Heading: React.FC<HeadingProps> = ({ children, level, className = '' }) =>
   const textContent = getTextContent(children)
   const slug = generateSlug(textContent)
 
-  const baseClasses = 'font-bold text-gray-900 scroll-mt-20'
+  const baseClasses = 'font-bold scroll-mt-20 relative'
   const levelClasses = {
-    2: 'text-2xl lg:text-3xl mt-12 mb-6 border-t-2 border-gray-200 pt-8',
-    3: 'text-xl lg:text-2xl mt-10 mb-4'
+    2: 'text-3xl lg:text-4xl mt-16 mb-8 text-blue-900 border-l-8 border-blue-500 pl-6 py-4 bg-gradient-to-r from-blue-50 to-transparent rounded-r-lg shadow-lg hover:shadow-xl transition-shadow duration-300',
+    3: 'text-2xl lg:text-3xl mt-12 mb-6 text-blue-800 border-l-6 border-blue-400 pl-5 py-3 bg-gradient-to-r from-blue-50/50 to-transparent rounded-r-md shadow-md hover:shadow-lg transition-shadow duration-300'
   }
 
   const Tag = `h${level}` as keyof JSX.IntrinsicElements
   const finalClassName = `${baseClasses} ${levelClasses[level]} ${className}`
 
+  const icons = {
+    2: '📚', // Book emoji for main sections
+    3: '💡'  // Bulb emoji for subsections
+  }
+
   return (
     <Tag id={slug} className={finalClassName}>
-      {children}
+      <span className="inline-flex items-center gap-3">
+        <span className="text-2xl" aria-hidden="true">{icons[level]}</span>
+        <span>{children}</span>
+      </span>
     </Tag>
   )
 }
