@@ -56,6 +56,7 @@ let bodyHTML = post?.body ? toHTML(post.body, {
 // 読みやすさのため、長い文章に改行を追加
 if (bodyHTML) {
   bodyHTML = bodyHTML
+    .replace(/<br><br>」/g, '」') // 「」の前の改行を削除
     .replace(/。\s*/g, '。<br><br>') // 句点の後に改行
     .replace(/！\s*/g, '！<br><br>') // 感嘆符の後に改行
     .replace(/？\s*/g, '？<br><br>') // 疑問符の後に改行
