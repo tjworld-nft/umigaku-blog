@@ -67,95 +67,114 @@ const Heading: React.FC<HeadingProps> = ({ children, level, className = '' }) =>
 const mergeDanglingQuoteParagraphs = (blocks: PortableTextBlock[]): PortableTextBlock[] => {
   if (!blocks || blocks.length === 0) return blocks
 
-  // First pass: identify and fix problematic patterns across ALL blocks
-  const allTextBlocks = blocks.filter(block => block._type === 'block' && block.style === 'normal')
-  
-  // Extract all text content to analyze patterns
-  const fullText = allTextBlocks.map(block => 
-    block.children?.map((child: any) => child.text || '').join('') || ''
-  ).join('\n')
+  const result: PortableTextBlock[] = []
+  let i = 0
 
-  const processedBlocks: PortableTextBlock[] = []
-
-  for (let i = 0; i < blocks.length; i++) {
+  while (i < blocks.length) {
     const currentBlock = blocks[i]
 
-    // Skip non-text blocks
+    // Pass through non-text blocks
     if (currentBlock._type !== 'block' || currentBlock.style !== 'normal') {
-      processedBlocks.push(currentBlock)
+      result.push(currentBlock)
+      i++
       continue
     }
 
-    // Get current block text
-    const currentText = currentBlock.children?.map((child: any) => child.text || '').join('') || ''
-    
-    // Ultra-aggressive merging conditions
-    const shouldMerge = 
-      // Block starts with closing punctuation
-      /^[\s\n]*[」！？。、』]/.test(currentText) ||
-      // Block is very short and contains closing punctuation  
-      (currentText.trim().length <= 10 && /[」！？。]/.test(currentText)) ||
-      // Block contains only punctuation and whitespace
-      /^[\s\n」！？。、』]*$/.test(currentText) ||
-      // Previous block ended with quote/exclamation without proper closing
-      (processedBlocks.length > 0 && (() => {
-        const prevText = processedBlocks[processedBlocks.length - 1].children?.map((child: any) => child.text || '').join('') || ''
-        return /[「『][^」』]*[！？][\s\n]*$/.test(prevText) && /^[\s\n]*」/.test(currentText)
-      })())
+    // Get text content of current block
+    const getCurrentText = (block: PortableTextBlock) => 
+      block.children?.map((child: any) => child.text || '').join('').trim() || ''
 
-    if (shouldMerge && processedBlocks.length > 0) {
-      const lastBlockIndex = processedBlocks.length - 1
-      const lastBlock = processedBlocks[lastBlockIndex]
+    const currentText = getCurrentText(currentBlock)
+
+    // Look ahead to find consecutive blocks that should be merged
+    const blocksToMerge = [currentBlock]
+    let j = i + 1
+
+    while (j < blocks.length) {
+      const nextBlock = blocks[j]
       
-      if (lastBlock._type === 'block' && lastBlock.style === 'normal') {
-        // Clean the current text thoroughly
-        const cleanText = currentText
-          .replace(/^[\s\n]+/, '') // Remove leading whitespace/newlines
-          .replace(/[\s\n]+$/, '') // Remove trailing whitespace/newlines
-        
-        // Create a new text node with cleaned content
-        const newTextNode = {
-          _type: 'span',
-          text: cleanText,
-          marks: []
-        }
+      if (nextBlock._type !== 'block' || nextBlock.style !== 'normal') {
+        break
+      }
 
-        // Merge by adding to the last block's children
-        processedBlocks[lastBlockIndex] = {
-          ...lastBlock,
-          children: [
-            ...(lastBlock.children || []),
-            newTextNode
-          ]
-        }
-        
-        continue
+      const nextText = getCurrentText(nextBlock)
+      
+      // Merge if next block:
+      // 1. Starts with closing punctuation (」！？。)
+      // 2. Contains only punctuation
+      // 3. Is very short (likely a fragment)
+      // 4. Continues a quote pattern
+      const shouldMergeNext = 
+        /^[」！？。、』]/.test(nextText) ||
+        /^[」！？。、』\s]*$/.test(nextText) ||
+        (nextText.length <= 3 && /[」！？。]/.test(nextText)) ||
+        (nextText === '」') ||
+        (nextText === '！' || nextText === '？' || nextText === '。')
+
+      if (shouldMergeNext) {
+        blocksToMerge.push(nextBlock)
+        j++
+      } else {
+        break
       }
     }
 
-    // If not merging, clean the current block thoroughly
-    const cleanedBlock = {
-      ...currentBlock,
-      children: currentBlock.children?.map((child: any) => {
-        if (child.text) {
-          return {
-            ...child,
-            text: child.text
-              // Remove all problematic line break patterns
-              .replace(/([！？])\s*\n+\s*」/g, '$1」') // Fix "楽しい！\n」"
-              .replace(/([^！？。])\s*\n+\s*」/g, '$1」') // Fix any text + newline + 」
-              .replace(/\s*\n+\s*([」！？。、])/g, '$1') // Remove newlines before punctuation
-              .replace(/(\r\n|\r|\n){2,}/g, '\n') // Reduce multiple newlines
+    // If we have multiple blocks to merge, create a combined block
+    if (blocksToMerge.length > 1) {
+      const mergedChildren: any[] = []
+      
+      for (const block of blocksToMerge) {
+        if (block.children) {
+          for (const child of block.children) {
+            if (child.text) {
+              const cleanedText = child.text
+                .replace(/^\s+/, '') // Remove leading spaces
+                .replace(/\s+$/, '') // Remove trailing spaces
+              
+              if (cleanedText) {
+                mergedChildren.push({
+                  ...child,
+                  text: cleanedText
+                })
+              }
+            } else {
+              mergedChildren.push(child)
+            }
           }
         }
-        return child
-      }) || []
-    }
+      }
 
-    processedBlocks.push(cleanedBlock)
+      // Create the merged block
+      const mergedBlock = {
+        ...currentBlock,
+        children: mergedChildren
+      }
+
+      result.push(mergedBlock)
+      i = j // Skip all the merged blocks
+    } else {
+      // No merging needed, just clean the current block
+      const cleanedBlock = {
+        ...currentBlock,
+        children: currentBlock.children?.map((child: any) => {
+          if (child.text) {
+            return {
+              ...child,
+              text: child.text
+                .replace(/([！？])\s*」/g, '$1」')
+                .replace(/([^！？。])\s*」/g, '$1」')
+            }
+          }
+          return child
+        }) || []
+      }
+      
+      result.push(cleanedBlock)
+      i++
+    }
   }
 
-  return processedBlocks
+  return result
 }
 
 // Custom components for Portable Text rendering
