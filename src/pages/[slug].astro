@@ -70,12 +70,12 @@ if (bodyHTML) {
     // エレガントなh3デザイン  
     .replace(/<h3>/g, '<h3 class="text-2xl font-bold mb-8 mt-14 text-slate-800 tracking-tight relative pl-4 before:content-[\'\'] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-gradient-to-b before:from-teal-400 before:to-cyan-600 before:rounded-full">')
     .replace(/<\/h3>/g, '</h3>')
-    // 通常の改行処理
-    .replace(/。\s*/g, '。<br><br>') // 句点の後に改行
-    .replace(/！\s*/g, '！<br><br>') // 感嘆符の後に改行
-    .replace(/？\s*/g, '？<br><br>') // 疑問符の後に改行
-    .replace(/」\s*/g, '」<br><br>') // かぎ括弧閉じの後に改行
-    .replace(/([。！？」])<br><br>(<\/p>)/g, '$1$2') // pタグ終了前の余分な改行を削除
+    // 文脈を考慮した改行処理
+    .replace(/。(?=\s*[^」\s])/g, '。<br><br>') // 句点の後に改行（」以外の場合）
+    .replace(/！(?=\s*[^」\s])/g, '！<br><br>') // 感嘆符の後に改行（」以外の場合）
+    .replace(/？(?=\s*[^」\s])/g, '？<br><br>') // 疑問符の後に改行（」以外の場合）
+    .replace(/」(?=\s*[^「」])/g, '」<br><br>') // かぎ括弧閉じの後に改行（連続する会話以外）
+    .replace(/([。！？」])<br><br>(\s*<\/p>)/g, '$1$2') // pタグ終了前の余分な改行を削除
 }
 
 // SEOデータを自動生成
