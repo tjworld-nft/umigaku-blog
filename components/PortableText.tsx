@@ -78,18 +78,24 @@ const mergeDanglingQuoteParagraphs = (blocks: PortableTextBlock[]): PortableText
 
     const currentText = getBlockText(currentBlock)
     
-    // Check if current block starts with closing quote and merge with previous
-    if (currentText.trim().startsWith('」') && processedBlocks.length > 0) {
+    // Check if current block starts with closing quote or continuation and merge with previous
+    const startsWithQuote = currentText.trim().startsWith('」')
+    const startsWithContinuation = /^[」！？。]/.test(currentText.trim())
+    
+    if ((startsWithQuote || startsWithContinuation) && processedBlocks.length > 0) {
       const lastBlock = processedBlocks[processedBlocks.length - 1]
       
       if (lastBlock._type === 'block' && lastBlock.style === 'normal') {
+        // Clean up the current block's text before merging
+        const cleanedCurrentChildren = (currentBlock.children || []).map((child: any) => ({
+          ...child,
+          text: child.text ? child.text.replace(/^\s+/, '').replace(/^\n+/, '') : child.text
+        }))
+
         // Merge current block's children with the last block
         const mergedChildren = [
           ...(lastBlock.children || []),
-          ...((currentBlock.children || []).map((child: any) => ({
-            ...child,
-            text: child.text ? child.text.replace(/^\s+/, '') : child.text // Remove leading whitespace
-          })))
+          ...cleanedCurrentChildren
         ]
 
         // Update the last block with merged content
@@ -108,9 +114,17 @@ const mergeDanglingQuoteParagraphs = (blocks: PortableTextBlock[]): PortableText
           return {
             ...child,
             text: child.text
-              .replace(/\n\s*」/g, '」') // Remove line breaks before closing quotes
-              .replace(/(\r\n|\r|\n){3,}/g, '\n\n') // Reduce multiple line breaks to double
-              .replace(/\s+」/g, '」') // Remove spaces before closing quotes
+              // Remove line breaks and spaces before closing quotes
+              .replace(/\s*\n+\s*」/g, '」')
+              .replace(/\s+」/g, '」')
+              // Remove line breaks and spaces before ending punctuation
+              .replace(/\s*\n+\s*([！？。])/g, '$1')
+              // Remove excessive line breaks
+              .replace(/(\r\n|\r|\n){3,}/g, '\n\n')
+              // Clean up patterns like "楽しい！\n" + "」" 
+              .replace(/([！？。])\s*\n+\s*」/g, '$1」')
+              // Remove line breaks between sentences and closing quotes
+              .replace(/([^。！？])\s*\n+\s*」/g, '$1」')
           }
         }
         return child
