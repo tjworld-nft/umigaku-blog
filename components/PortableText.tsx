@@ -86,11 +86,28 @@ const mergeDanglingQuoteParagraphs = (blocks: PortableTextBlock[]): PortableText
 
     const currentText = getBlockText(currentBlock)
     
-    // Check if current block starts with closing quote or continuation and merge with previous
+    // More aggressive merging: check for quotes, punctuation, or very short blocks
     const startsWithQuote = currentText.trim().startsWith('」')
-    const startsWithContinuation = /^[」！？。]/.test(currentText.trim())
+    const startsWithContinuation = /^[」！？。、]/.test(currentText.trim())
+    const isVeryShort = currentText.trim().length <= 5 && /[」！？。]/.test(currentText)
+    const hasOnlyPunctuation = /^[」！？。、\s]*$/.test(currentText.trim())
     
-    if ((startsWithQuote || startsWithContinuation) && processedBlocks.length > 0) {
+    // Check if previous block ended with potential continuation
+    let shouldMergeWithPrevious = false
+    if (processedBlocks.length > 0) {
+      const lastBlock = processedBlocks[processedBlocks.length - 1]
+      if (lastBlock._type === 'block' && lastBlock.style === 'normal') {
+        const lastText = getBlockText(lastBlock)
+        const endsWithOpenQuote = /[「『]/.test(lastText) && !lastText.includes('」') && !lastText.includes('』')
+        const endsWithoutPunctuation = !/[。！？」』]$/.test(lastText.trim())
+        
+        shouldMergeWithPrevious = (startsWithQuote || startsWithContinuation || isVeryShort || hasOnlyPunctuation) ||
+                                 (endsWithOpenQuote && currentText.includes('」')) ||
+                                 (endsWithoutPunctuation && (startsWithQuote || isVeryShort))
+      }
+    }
+    
+    if (shouldMergeWithPrevious && processedBlocks.length > 0) {
       const lastBlock = processedBlocks[processedBlocks.length - 1]
       
       if (lastBlock._type === 'block' && lastBlock.style === 'normal') {
@@ -126,13 +143,17 @@ const mergeDanglingQuoteParagraphs = (blocks: PortableTextBlock[]): PortableText
               .replace(/\s*\n+\s*」/g, '」')
               .replace(/\s+」/g, '」')
               // Remove line breaks and spaces before ending punctuation
-              .replace(/\s*\n+\s*([！？。])/g, '$1')
+              .replace(/\s*\n+\s*([！？。、])/g, '$1')
               // Remove excessive line breaks
               .replace(/(\r\n|\r|\n){3,}/g, '\n\n')
               // Clean up patterns like "楽しい！\n" + "」" 
               .replace(/([！？。])\s*\n+\s*」/g, '$1」')
               // Remove line breaks between sentences and closing quotes
               .replace(/([^。！？])\s*\n+\s*」/g, '$1」')
+              // Handle quotes within the same text node
+              .replace(/([「『][^」』]*)\s*\n+\s*([^」』]*」)/g, '$1$2')
+              // Clean up standalone quotes or punctuation
+              .replace(/^\s*([」！？。、])/g, '$1')
           }
         }
         return child
@@ -147,7 +168,35 @@ const mergeDanglingQuoteParagraphs = (blocks: PortableTextBlock[]): PortableText
     }
   }
 
-  return processedBlocks
+  // Final pass: merge any remaining isolated punctuation blocks
+  const finalBlocks: PortableTextBlock[] = []
+  
+  for (let i = 0; i < processedBlocks.length; i++) {
+    const block = processedBlocks[i]
+    
+    if (block._type === 'block' && block.style === 'normal') {
+      const text = block.children?.map((child: any) => child.text || '').join('') || ''
+      
+      // If this block is just punctuation and we have a previous block, merge it
+      if (/^[」！？。、\s]*$/.test(text.trim()) && finalBlocks.length > 0) {
+        const lastBlock = finalBlocks[finalBlocks.length - 1]
+        if (lastBlock._type === 'block' && lastBlock.style === 'normal') {
+          finalBlocks[finalBlocks.length - 1] = {
+            ...lastBlock,
+            children: [
+              ...(lastBlock.children || []),
+              ...(block.children || [])
+            ]
+          }
+          continue
+        }
+      }
+    }
+    
+    finalBlocks.push(block)
+  }
+  
+  return finalBlocks
 }
 
 // Custom components for Portable Text rendering
