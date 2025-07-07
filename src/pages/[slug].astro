@@ -61,12 +61,12 @@ if (bodyHTML) {
     .replace(/\s*<br\s*\/?>\s*」/g, '」') 
     .replace(/\s*<\/p>\s*<p[^>]*>\s*」/g, '」')
     .replace(/([！？])\s*<\/p>\s*<p[^>]*>\s*」/g, '$1」')
-    // h2のカスタムスタイリング追加
-    .replace(/<h2>/g, '<h2 class="text-2xl font-bold mb-8 mt-12 relative text-blue-900 border-l-8 border-blue-500 pl-6 py-4 bg-gradient-to-r from-blue-50 to-transparent rounded-r-lg shadow-lg"><span class="text-2xl mr-3">📚</span>')
-    .replace(/<\/h2>/g, '</h2>')
-    // h3のカスタムスタイリング追加  
-    .replace(/<h3>/g, '<h3 class="text-xl font-semibold mb-6 mt-10 relative text-blue-800 border-l-6 border-blue-400 pl-5 py-3 bg-gradient-to-r from-blue-50/50 to-transparent rounded-r-md shadow-md"><span class="text-xl mr-3">💡</span>')
-    .replace(/<\/h3>/g, '</h3>')
+    // h2のモダンなスタイリング
+    .replace(/<h2>/g, '<h2 class="text-3xl font-bold mb-10 mt-16 text-gray-900 relative group">')
+    .replace(/<\/h2>/g, '<span class="absolute -bottom-2 left-0 w-16 h-1 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full group-hover:w-24 transition-all duration-300"></span></h2>')
+    // h3のモダンなスタイリング  
+    .replace(/<h3>/g, '<h3 class="text-2xl font-semibold mb-6 mt-12 text-gray-800 relative group">')
+    .replace(/<\/h3>/g, '<span class="absolute -bottom-1 left-0 w-12 h-0.5 bg-gradient-to-r from-teal-400 to-cyan-400 rounded-full group-hover:w-16 transition-all duration-300"></span></h3>')
     // 通常の改行処理
     .replace(/。\s*/g, '。<br><br>') // 句点の後に改行
     .replace(/！\s*/g, '！<br><br>') // 感嘆符の後に改行
