@@ -68,92 +68,56 @@ const mergeDanglingQuoteParagraphs = (blocks: PortableTextBlock[]): PortableText
   if (!blocks || blocks.length === 0) return blocks
 
   const result: PortableTextBlock[] = []
-  let i = 0
-
-  while (i < blocks.length) {
+  
+  for (let i = 0; i < blocks.length; i++) {
     const currentBlock = blocks[i]
 
-    // Pass through non-text blocks
-    if (currentBlock._type !== 'block' || currentBlock.style !== 'normal') {
+    // Pass through non-paragraph blocks as-is
+    if (currentBlock._type !== 'block' || !currentBlock.style || currentBlock.style === 'h1' || currentBlock.style === 'h2' || currentBlock.style === 'h3' || currentBlock.style === 'h4' || currentBlock.style === 'h5' || currentBlock.style === 'h6') {
       result.push(currentBlock)
-      i++
       continue
     }
 
-    // Get text content of current block
-    const getCurrentText = (block: PortableTextBlock) => 
-      block.children?.map((child: any) => child.text || '').join('').trim() || ''
+    // Get text content
+    const getText = (block: any) => 
+      block.children?.map((child: any) => child.text || '').join('') || ''
 
-    const currentText = getCurrentText(currentBlock)
+    const currentText = getText(currentBlock).trim()
 
-    // Look ahead to find consecutive blocks that should be merged
-    const blocksToMerge = [currentBlock]
-    let j = i + 1
+    // Check if this block should be merged with the previous one
+    const shouldMergeWithPrevious = result.length > 0 && 
+      result[result.length - 1]._type === 'block' && 
+      result[result.length - 1].style === 'normal' && (
+        // Block starts with closing punctuation
+        /^[」！？。、』]/.test(currentText) ||
+        // Block contains only punctuation/whitespace
+        /^[」！？。、』\s]*$/.test(currentText) ||
+        // Very short block with punctuation
+        (currentText.length <= 5 && /[」！？。]/.test(currentText)) ||
+        // Single punctuation
+        ['」', '！', '？', '。', '、'].includes(currentText)
+      )
 
-    while (j < blocks.length) {
-      const nextBlock = blocks[j]
+    if (shouldMergeWithPrevious) {
+      // Merge with previous block
+      const prevBlock = result[result.length - 1]
+      const cleanedText = currentText.replace(/^\s+/, '').replace(/\s+$/, '')
       
-      if (nextBlock._type !== 'block' || nextBlock.style !== 'normal') {
-        break
-      }
-
-      const nextText = getCurrentText(nextBlock)
-      
-      // Merge if next block:
-      // 1. Starts with closing punctuation (」！？。)
-      // 2. Contains only punctuation
-      // 3. Is very short (likely a fragment)
-      // 4. Continues a quote pattern
-      const shouldMergeNext = 
-        /^[」！？。、』]/.test(nextText) ||
-        /^[」！？。、』\s]*$/.test(nextText) ||
-        (nextText.length <= 3 && /[」！？。]/.test(nextText)) ||
-        (nextText === '」') ||
-        (nextText === '！' || nextText === '？' || nextText === '。')
-
-      if (shouldMergeNext) {
-        blocksToMerge.push(nextBlock)
-        j++
-      } else {
-        break
-      }
-    }
-
-    // If we have multiple blocks to merge, create a combined block
-    if (blocksToMerge.length > 1) {
-      const mergedChildren: any[] = []
-      
-      for (const block of blocksToMerge) {
-        if (block.children) {
-          for (const child of block.children) {
-            if (child.text) {
-              const cleanedText = child.text
-                .replace(/^\s+/, '') // Remove leading spaces
-                .replace(/\s+$/, '') // Remove trailing spaces
-              
-              if (cleanedText) {
-                mergedChildren.push({
-                  ...child,
-                  text: cleanedText
-                })
-              }
-            } else {
-              mergedChildren.push(child)
+      if (cleanedText) {
+        result[result.length - 1] = {
+          ...prevBlock,
+          children: [
+            ...(prevBlock.children || []),
+            {
+              _type: 'span',
+              text: cleanedText,
+              marks: []
             }
-          }
+          ]
         }
       }
-
-      // Create the merged block
-      const mergedBlock = {
-        ...currentBlock,
-        children: mergedChildren
-      }
-
-      result.push(mergedBlock)
-      i = j // Skip all the merged blocks
     } else {
-      // No merging needed, just clean the current block
+      // Clean the block and add it
       const cleanedBlock = {
         ...currentBlock,
         children: currentBlock.children?.map((child: any) => {
@@ -161,8 +125,10 @@ const mergeDanglingQuoteParagraphs = (blocks: PortableTextBlock[]): PortableText
             return {
               ...child,
               text: child.text
-                .replace(/([！？])\s*」/g, '$1」')
-                .replace(/([^！？。])\s*」/g, '$1」')
+                // Remove line breaks before punctuation
+                .replace(/\s*\n+\s*([」！？。、])/g, '$1')
+                // Clean up excessive whitespace
+                .replace(/\s{2,}/g, ' ')
             }
           }
           return child
@@ -170,7 +136,6 @@ const mergeDanglingQuoteParagraphs = (blocks: PortableTextBlock[]): PortableText
       }
       
       result.push(cleanedBlock)
-      i++
     }
   }
 
@@ -180,14 +145,25 @@ const mergeDanglingQuoteParagraphs = (blocks: PortableTextBlock[]): PortableText
 // Custom components for Portable Text rendering
 const components = {
   block: {
+    // Handle different heading styles
+    h1: ({ children }: { children: React.ReactNode }) => (
+      <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mt-16 mb-12">
+        {children}
+      </h1>
+    ),
     h2: ({ children }: { children: React.ReactNode }) => (
       <Heading level={2}>{children}</Heading>
     ),
     h3: ({ children }: { children: React.ReactNode }) => (
       <Heading level={3}>{children}</Heading>
     ),
+    h4: ({ children }: { children: React.ReactNode }) => (
+      <h4 className="text-xl font-semibold text-gray-900 mt-8 mb-4">
+        {children}
+      </h4>
+    ),
     normal: ({ children }: { children: React.ReactNode }) => (
-      <p className="mb-6 text-lg leading-relaxed text-gray-800 whitespace-pre-line">
+      <p className="mb-6 text-lg leading-relaxed text-gray-800">
         {children}
       </p>
     ),
@@ -239,6 +215,15 @@ const components = {
 
 // Main PortableText component
 const PortableText: React.FC<PortableTextProps> = ({ value, className = '' }) => {
+  // Debug: Log first few blocks to understand structure
+  if (value && value.length > 0) {
+    console.log('Sanity blocks structure:', value.slice(0, 5).map(block => ({
+      _type: block._type,
+      style: (block as any).style,
+      text: (block as any).children?.map((child: any) => child.text).join('') || 'no text'
+    })))
+  }
+
   // Process blocks to merge dangling quotes and clean up noise
   const processedBlocks = mergeDanglingQuoteParagraphs(value)
 
