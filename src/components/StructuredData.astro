@@ -8,6 +8,7 @@ export interface Props {
   datePublished?: string
   dateModified?: string
   author?: string
+  tags?: string[]
 }
 
 const {
@@ -18,7 +19,8 @@ const {
   image,
   datePublished,
   dateModified,
-  author = '三浦 海の学校'
+  author = '三浦 海の学校',
+  tags = []
 } = Astro.props
 
 const baseData = {
@@ -42,7 +44,12 @@ const articleData = type === 'article' ? {
   author: {
     '@type': 'Organization',
     name: author
-  }
+  },
+  keywords: tags,
+  about: tags.map(tag => ({
+    '@type': 'Thing',
+    name: tag
+  }))
 } : {}
 
 const structuredData = { ...baseData, ...articleData }

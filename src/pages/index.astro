@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { getPosts } from '../lib/sanityClient'
+import { detectTags, extractTextFromPortableText, getPopularTags } from '../lib/autoTagger'
 import type { Post } from '../types/Post'
 
 let posts: Post[] = []
@@ -12,6 +13,16 @@ try {
   error = '記事の取得に失敗しました'
   console.error('Error fetching posts:', err)
 }
+
+// 各記事にタグを追加
+const postsWithTags = posts.map(post => {
+  const bodyText = extractTextFromPortableText(post.body || [])
+  const autoTags = detectTags(post.title, bodyText)
+  return { ...post, autoTags }
+})
+
+// 人気タグの取得
+const popularTags = getPopularTags(postsWithTags).slice(0, 8) // 上位8タグ
 
 // 画像URLを生成する関数
 function getImageUrl(imageRef: string, projectId: string, dataset: string) {
@@ -36,6 +47,26 @@ function formatDate(dateString: string) {
   ) : (
     <>
       <h1 class="text-3xl font-bold text-gray-900 mb-8">最新記事</h1>
+      
+      <!-- タグクラウド -->
+      {popularTags.length > 0 && (
+        <div class="mb-12 p-6 bg-white/80 backdrop-blur-md rounded-lg shadow-md">
+          <h2 class="text-xl font-bold text-gray-900 mb-4">人気のタグ</h2>
+          <div class="flex flex-wrap gap-3">
+            {popularTags.map(({ tag, count, color }) => (
+              <a
+                href={`/tags/${encodeURIComponent(tag)}`}
+                class="inline-flex items-center gap-2 px-3 py-1 text-sm font-medium text-white rounded-full transition-all duration-300 hover:scale-105 hover:shadow-md"
+                style={`background-color: ${color}`}
+              >
+                {tag}
+                <span class="text-xs bg-white/20 px-1.5 py-0.5 rounded-full">{count}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+      
       <!-- TODO: 20記事以上になったらページネーション実装 -->
       <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
         {posts.slice(0, 20).map((post) => (

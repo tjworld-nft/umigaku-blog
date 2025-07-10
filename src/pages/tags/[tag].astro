@@ -1,0 +1,159 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { getPosts } from '../../lib/sanityClient'
+import { detectTags, extractTextFromPortableText, getTagColor, tagRules } from '../../lib/autoTagger'
+import type { Post } from '../../types/Post'
+
+export async function getStaticPaths() {
+  const posts = await getPosts()
+  const tagCounts = new Map<string, number>()
+  
+  // 全記事からタグを抽出してカウント
+  posts.forEach((post: Post) => {
+    const bodyText = extractTextFromPortableText(post.body || [])
+    const autoTags = detectTags(post.title, bodyText)
+    
+    autoTags.forEach(tag => {
+      tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1)
+    })
+  })
+  
+  // タグごとにパスを生成
+  return Array.from(tagCounts.keys()).map(tag => ({
+    params: { tag: encodeURIComponent(tag) },
+  }))
+}
+
+const { tag } = Astro.params
+const decodedTag = decodeURIComponent(tag!)
+
+const posts = await getPosts()
+
+// このタグを持つ記事を抽出
+const taggedPosts = posts.filter((post: Post) => {
+  const bodyText = extractTextFromPortableText(post.body || [])
+  const autoTags = detectTags(post.title, bodyText)
+  return autoTags.includes(decodedTag)
+})
+
+// 画像URLを生成する関数
+function getImageUrl(imageRef: string, projectId: string, dataset: string) {
+  return `https://cdn.sanity.io/images/${projectId}/${dataset}/${imageRef.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp')}`
+}
+
+// 日付フォーマット関数
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString('ja-JP', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+const tagColor = getTagColor(decodedTag)
+const tagRule = tagRules.find(rule => rule.tag === decodedTag)
+
+const pageTitle = `${decodedTag}の記事一覧`
+const pageDescription = `三浦海の学校の「${decodedTag}」に関する記事一覧です。ダイビング、マリンアクティビティの情報をお届けします。`
+const pageKeywords = `${decodedTag}, ダイビング, 三浦, 海の学校, マリンアクティビティ`
+---
+
+<BaseLayout 
+  title={pageTitle}
+  description={pageDescription}
+  keywords={pageKeywords}
+  type="website"
+>
+  <main class="max-w-5xl mx-auto px-4 py-10 space-y-16 relative z-10">
+    <!-- タグヘッダー -->
+    <div class="text-center mb-12">
+      <div class="inline-flex items-center gap-3 mb-4">
+        <span 
+          class="inline-block px-4 py-2 text-white font-medium rounded-full text-lg"
+          style={`background-color: ${tagColor}`}
+        >
+          {decodedTag}
+        </span>
+      </div>
+      <h1 class="text-3xl font-bold text-gray-900 mb-4">
+        「{decodedTag}」の記事一覧
+      </h1>
+      <p class="text-gray-600 text-lg">
+        {taggedPosts.length}件の記事が見つかりました
+      </p>
+    </div>
+
+    <!-- 記事一覧 -->
+    <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+      {taggedPosts.map((post) => (
+        <div class="max-w-3xl mx-auto">
+          <article class="w-full bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            {post.mainImage && (
+              <div class="aspect-video bg-gray-200">
+                <img
+                  src={getImageUrl(post.mainImage.asset._ref, import.meta.env.SANITY_PROJECT_ID, import.meta.env.SANITY_DATASET)}
+                  alt={post.title}
+                  class="w-full h-full object-cover rounded-t-lg"
+                />
+              </div>
+            )}
+            <div class="p-6">
+              <h2 class="text-xl font-bold mb-2 line-clamp-2">
+                <a 
+                  href={`/blog/${post.slug}`}
+                  class="text-gray-900 hover:text-blue-600 transition-colors"
+                >
+                  {post.title}
+                </a>
+              </h2>
+              <p class="text-gray-600 text-sm mb-4">
+                {formatDate(post.publishedAt || post._createdAt)}
+              </p>
+              <a 
+                href={`/blog/${post.slug}`}
+                class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+              >
+                続きを読む
+              </a>
+            </div>
+          </article>
+        </div>
+      ))}
+    </div>
+
+    <!-- 他のタグへのリンク -->
+    <div class="mt-16 pt-8 border-t border-gray-200">
+      <h3 class="text-2xl font-bold text-gray-900 mb-6">他のタグを見る</h3>
+      <div class="flex flex-wrap gap-3">
+        {tagRules.map(rule => (
+          <a
+            href={`/tags/${encodeURIComponent(rule.tag)}`}
+            class={`inline-block px-3 py-1 text-sm font-medium text-white rounded-full transition-all duration-300 hover:scale-105 hover:shadow-md ${rule.tag === decodedTag ? 'opacity-50 cursor-default' : ''}`}
+            style={`background-color: ${rule.color}`}
+          >
+            {rule.tag}
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <!-- ブログ一覧に戻る -->
+    <div class="text-center">
+      <a
+        href="/blog/"
+        class="inline-block bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors"
+      >
+        すべての記事を見る
+      </a>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

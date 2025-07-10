@@ -92,18 +92,21 @@ if (post) {
 
 const pageTitle = seoData ? seoData.ogTitle : '記事が見つかりません'
 const pageDescription = seoData ? seoData.metaDescription : ''
-const pageKeywords = seoData ? seoData.keywords.join(', ') : ''
+// SEOキーワードにタグを追加
+const baseKeywords = seoData ? seoData.keywords : []
+const allKeywords = [...baseKeywords, ...autoTags].join(', ')
 const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, import.meta.env.SANITY_PROJECT_ID, import.meta.env.SANITY_DATASET) : undefined
 ---
 
 <BaseLayout 
   title={pageTitle} 
   description={pageDescription}
-  keywords={pageKeywords}
+  keywords={allKeywords}
   image={pageImage}
   type="article"
   datePublished={post?.publishedAt || post?._createdAt}
   dateModified={post?._createdAt}
+  tags={autoTags}
 >
   {error || !post ? (
     <div class="text-center py-12">
@@ -145,12 +148,13 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
               <p class="text-gray-600 font-medium mb-3">タグ</p>
               <div class="flex flex-wrap gap-2">
                 {autoTags.map(tag => (
-                  <span 
-                    class="inline-block px-3 py-1 text-sm font-medium text-white rounded-full transition-all duration-300 hover:scale-105 hover:shadow-md"
+                  <a
+                    href={`/tags/${encodeURIComponent(tag)}`}
+                    class="inline-block px-3 py-1 text-sm font-medium text-white rounded-full transition-all duration-300 hover:scale-105 hover:shadow-md hover:opacity-90"
                     style={`background-color: ${getTagColor(tag)}`}
                   >
                     {tag}
-                  </span>
+                  </a>
                 ))}
               </div>
             </div>

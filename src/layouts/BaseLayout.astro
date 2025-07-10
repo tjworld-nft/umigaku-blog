@@ -10,6 +10,7 @@ export interface Props {
   type?: 'website' | 'article'
   datePublished?: string
   dateModified?: string
+  tags?: string[]
 }
 
 const { 
@@ -19,7 +20,8 @@ const {
   image,
   type = 'website',
   datePublished,
-  dateModified
+  dateModified,
+  tags = []
 } = Astro.props
 ---
 
@@ -57,6 +59,7 @@ const {
       image={image}
       datePublished={datePublished}
       dateModified={dateModified}
+      tags={tags}
     />
   </head>
   <body class="underwater-bg text-white leading-relaxed">
