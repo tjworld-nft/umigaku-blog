@@ -54,14 +54,13 @@ function formatDate(dateString: string) {
           <h2 class="text-xl font-bold text-gray-900 mb-4">人気のタグ</h2>
           <div class="flex flex-wrap gap-3">
             {popularTags.map(({ tag, count, color }) => (
-              <a
-                href={`/tags/${encodeURIComponent(tag)}`}
-                class="inline-flex items-center gap-2 px-3 py-1 text-sm font-medium text-white rounded-full transition-all duration-300 hover:scale-105 hover:shadow-md"
+              <span
+                class="inline-flex items-center gap-2 px-3 py-1 text-sm font-medium text-white rounded-full"
                 style={`background-color: ${color}`}
               >
                 {tag}
                 <span class="text-xs bg-white/20 px-1.5 py-0.5 rounded-full">{count}</span>
-              </a>
+              </span>
             ))}
           </div>
         </div>
