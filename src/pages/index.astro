@@ -55,7 +55,7 @@ function formatDate(dateString: string) {
           <div class="flex flex-wrap gap-3">
             {popularTags.map(({ tag, count, color }) => (
               <a
-                href={`/blog/tags/${encodeURIComponent(tag)}`}
+                href={`/tags/${encodeURIComponent(tag)}`}
                 class="inline-flex items-center gap-2 px-3 py-1 text-sm font-medium text-white rounded-full transition-all duration-300 hover:scale-105 hover:shadow-md"
                 style={`background-color: ${color}`}
               >
@@ -84,7 +84,7 @@ function formatDate(dateString: string) {
             <div class="p-6">
               <h2 class="text-xl font-bold mb-2 line-clamp-2">
                 <a
-                  href={`/blog/${post.slug}`}
+                  href={`/${post.slug}`}
                   class="text-gray-900 hover:text-blue-600 transition-colors"
                 >
                   {post.title}
@@ -94,7 +94,7 @@ function formatDate(dateString: string) {
                 {formatDate(post.publishedAt || post._createdAt)}
               </p>
               <a
-                href={`/blog/${post.slug}`}
+                href={`/${post.slug}`}
                 class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
               >
                 続きを読む
