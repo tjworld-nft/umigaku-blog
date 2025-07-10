@@ -55,7 +55,7 @@ function formatDate(dateString: string) {
           <div class="flex flex-wrap gap-3">
             {popularTags.map(({ tag, count, color }) => (
               <a
-                href={`/tags/${encodeURIComponent(tag)}`}
+                href={`/blog/tags/${encodeURIComponent(tag)}`}
                 class="inline-flex items-center gap-2 px-3 py-1 text-sm font-medium text-white rounded-full transition-all duration-300 hover:scale-105 hover:shadow-md"
                 style={`background-color: ${color}`}
               >
