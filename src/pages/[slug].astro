@@ -165,7 +165,7 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
             <div class="flex flex-wrap gap-3">
               <!-- X (Twitter) -->
               <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(`https://miura-diving.com/blog/${post.slug}`)}&via=miurakaigaku`}
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(`https://miura-diving.com/blog/${post.slug}/`)}&via=miurakaigaku`}
                 target="_blank"
                 rel="noopener noreferrer"
                 class="group inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105"
@@ -178,7 +178,7 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
               
               <!-- Facebook -->
               <a
-                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://miura-diving.com/blog/${post.slug}`)}`}
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://miura-diving.com/blog/${post.slug}/`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 class="group inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105"
