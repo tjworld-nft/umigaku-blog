@@ -1,4 +1,7 @@
-const FtpDeploy = require('ftp-deploy');
+import FtpDeploy from 'ftp-deploy';
+import dotenv from 'dotenv';
+
+dotenv.config();
 const ftpDeploy = new FtpDeploy();
 
 const config = {
@@ -6,7 +9,7 @@ const config = {
     password: process.env.FTP_PASSWORD,
     host: process.env.FTP_HOST,
     port: process.env.FTP_PORT || 21,
-    localRoot: __dirname + '/../dist/',
+    localRoot: './dist/',
     remoteRoot: '/public_html/blog/',
     include: ['*', '**/*'],
     exclude: [
