@@ -111,7 +111,7 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
   {error || !post ? (
     <div class="text-center py-12">
       <p class="text-red-600 text-lg mb-4">{error || '記事が見つかりません'}</p>
-      <a href="/" class="text-blue-600 hover:underline">
+      <a href="/blog/" class="text-blue-600 hover:underline">
         ホームに戻る
       </a>
     </div>
@@ -211,7 +211,7 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
 
       <div class="mt-8 text-center">
         <a
-          href="/"
+          href="/blog/"
           class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
         >
           記事一覧に戻る

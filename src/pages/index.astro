@@ -83,7 +83,7 @@ function formatDate(dateString: string) {
             <div class="p-6">
               <h2 class="text-xl font-bold mb-2 line-clamp-2">
                 <a
-                  href={`/${post.slug}/`}
+                  href={`/blog/${post.slug}/`}
                   class="text-gray-900 hover:text-blue-600 transition-colors"
                 >
                   {post.title}
@@ -93,7 +93,7 @@ function formatDate(dateString: string) {
                 {formatDate(post.publishedAt || post._createdAt)}
               </p>
               <a
-                href={`/${post.slug}/`}
+                href={`/blog/${post.slug}/`}
                 class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
               >
                 続きを読む
