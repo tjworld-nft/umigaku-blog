@@ -47,8 +47,8 @@ let bodyHTML = post?.body ? toHTML(post.body, {
   components: {
     types: {
       image: ({ value }) => {
-        const imageUrl = getImageUrl(value.asset._ref, import.meta.env.SANITY_PROJECT_ID, import.meta.env.SANITY_DATASET)
-        return `<img src="${imageUrl}" alt="${value.alt || ''}" class="w-full h-auto rounded-lg my-4" />`
+        const imageUrl = value.asset?.url
+        return `<img src="${imageUrl || ''}" alt="${value.alt || ''}" class="w-full h-auto rounded-lg my-4" />`
       }
     }
   }
@@ -95,7 +95,7 @@ const pageDescription = seoData ? seoData.metaDescription : ''
 // SEOキーワードにタグを追加
 const baseKeywords = seoData ? seoData.keywords : []
 const allKeywords = [...baseKeywords, ...autoTags].join(', ')
-const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, import.meta.env.SANITY_PROJECT_ID, import.meta.env.SANITY_DATASET) : undefined
+const pageImage = post?.mainImage?.asset?.url
 ---
 
 <BaseLayout 
@@ -121,7 +121,7 @@ const pageImage = post?.mainImage ? getImageUrl(post.mainImage.asset._ref, impor
         {post.mainImage && (
           <div class="aspect-video bg-gray-200">
             <img
-              src={getImageUrl(post.mainImage.asset._ref, import.meta.env.SANITY_PROJECT_ID, import.meta.env.SANITY_DATASET)}
+              src={post.mainImage.asset.url}
               alt={post.title}
               class="w-full h-full object-cover"
             />

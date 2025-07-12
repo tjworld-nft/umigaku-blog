@@ -74,7 +74,7 @@ function formatDate(dateString: string) {
             {post.mainImage && (
               <div class="aspect-video bg-gray-200">
                 <img
-                  src={getImageUrl(post.mainImage.asset._ref, import.meta.env.SANITY_PROJECT_ID, import.meta.env.SANITY_DATASET)}
+                  src={post.mainImage.asset.url}
                   alt={post.title}
                   class="w-full h-full object-cover rounded-t-lg"
                 />

@@ -10,10 +10,44 @@ export const client = createClient({
 
 export const getPosts = () =>
   client.fetch(`*[_type=="post" && defined(slug.current)]{
-    _id, title, "slug": slug.current, mainImage, body, publishedAt, _createdAt
+    _id, title, "slug": slug.current, 
+    mainImage{
+      asset->{
+        _id,
+        url
+      }
+    }, 
+    body[]{
+      ...,
+      _type == "image" => {
+        ...,
+        asset->{
+          _id,
+          url
+        }
+      }
+    }, 
+    publishedAt, _createdAt
   }|order(coalesce(publishedAt, _createdAt) desc)[0..19]`);
 
 export const getPost = (slug: string) =>
   client.fetch(`*[_type=="post" && slug.current == $slug][0]{
-    _id, title, "slug": slug.current, mainImage, body, publishedAt, _createdAt
+    _id, title, "slug": slug.current, 
+    mainImage{
+      asset->{
+        _id,
+        url
+      }
+    }, 
+    body[]{
+      ...,
+      _type == "image" => {
+        ...,
+        asset->{
+          _id,
+          url
+        }
+      }
+    }, 
+    publishedAt, _createdAt
   }`, { slug });

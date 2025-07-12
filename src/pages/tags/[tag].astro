@@ -75,10 +75,10 @@ const pageKeywords = `${decodedTag}, ダイビング, 三浦, 海の学校, マ�
       {taggedPosts.map((post) => (
         <div class="max-w-3xl mx-auto">
           <article class="w-full bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-            {post.mainImage && (
+            {post.mainImage?.asset?.url && (
               <div class="aspect-video bg-gray-200">
                 <img
-                  src={getImageUrl(post.mainImage.asset._ref, import.meta.env.SANITY_PROJECT_ID, import.meta.env.SANITY_DATASET)}
+                  src={post.mainImage.asset.url}
                   alt={post.title}
                   class="w-full h-full object-cover rounded-t-lg"
                 />
