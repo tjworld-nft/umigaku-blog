@@ -4,6 +4,7 @@ import { getPost, getPosts } from '../lib/sanityClient'
 import { toHTML } from '@portabletext/to-html'
 import { generateSEOData } from '../lib/seoGenerator'
 import { detectTags, extractTextFromPortableText, getTagColor } from '../lib/autoTagger'
+import { calculateReadingTimeFromPortableText, formatReadingTime } from '../lib/readingTime'
 import type { Post } from '../types/Post'
 
 export async function getStaticPaths() {
@@ -85,9 +86,11 @@ const seoData = post ? generateSEOData(post.title, post.body || []) : null
 
 // 自動タグ生成
 let autoTags: string[] = []
+let readingTime = 1
 if (post) {
   const bodyText = extractTextFromPortableText(post.body || [])
   autoTags = detectTags(post.title, bodyText)
+  readingTime = calculateReadingTimeFromPortableText(post.body || [])
 }
 
 const pageTitle = seoData ? seoData.ogTitle : '記事が見つかりません'
@@ -133,10 +136,16 @@ const pageImage = post?.mainImage?.asset?.url
             {post.title}
           </h1>
           
-          <div class="flex items-center text-gray-600 text-sm mb-8">
+          <div class="flex items-center gap-4 text-gray-600 text-sm mb-8">
             <time datetime={post.publishedAt || post._createdAt}>
               {formatDate(post.publishedAt || post._createdAt)}
             </time>
+            <span class="flex items-center gap-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              {formatReadingTime(readingTime)}
+            </span>
           </div>
 
           <div class="prose max-w-none mx-auto readable-content" set:html={bodyHTML}>

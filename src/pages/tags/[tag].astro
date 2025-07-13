@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { getPosts } from '../../lib/sanityClient'
 import { detectTags, extractTextFromPortableText, getTagColor, tagRules } from '../../lib/autoTagger'
+import { calculateReadingTimeFromPortableText, formatReadingTime } from '../../lib/readingTime'
 import type { Post } from '../../types/Post'
 
 export async function getStaticPaths() {
@@ -16,11 +17,14 @@ const decodedTag = decodeURIComponent(tag!)
 
 const posts = await getPosts()
 
-// このタグを持つ記事を抽出
+// このタグを持つ記事を抽出し、読了時間を追加
 const taggedPosts = posts.filter((post: Post) => {
   const bodyText = extractTextFromPortableText(post.body || [])
   const autoTags = detectTags(post.title, bodyText)
   return autoTags.includes(decodedTag)
+}).map(post => {
+  const readingTime = calculateReadingTimeFromPortableText(post.body || [])
+  return { ...post, readingTime }
 })
 
 // 画像URLを生成する関数
@@ -93,9 +97,17 @@ const pageKeywords = `${decodedTag}, ダイビング, 三浦, 海の学校, マ�
                   {post.title}
                 </a>
               </h2>
-              <p class="text-gray-600 text-sm mb-4">
-                {formatDate(post.publishedAt || post._createdAt)}
-              </p>
+              <div class="flex items-center gap-4 text-gray-600 text-sm mb-4">
+                <time datetime={post.publishedAt || post._createdAt}>
+                  {formatDate(post.publishedAt || post._createdAt)}
+                </time>
+                <span class="flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  {formatReadingTime(post.readingTime)}
+                </span>
+              </div>
               <a 
                 href={`/blog/${post.slug}/`}
                 class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"

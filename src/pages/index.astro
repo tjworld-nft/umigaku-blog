@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { getPosts } from '../lib/sanityClient'
 import { detectTags, extractTextFromPortableText, getPopularTags } from '../lib/autoTagger'
+import { calculateReadingTimeFromPortableText, formatReadingTime } from '../lib/readingTime'
 import type { Post } from '../types/Post'
 
 let posts: Post[] = []
@@ -14,11 +15,12 @@ try {
   console.error('Error fetching posts:', err)
 }
 
-// 各記事にタグを追加
+// 各記事にタグと読了時間を追加
 const postsWithTags = posts.map(post => {
   const bodyText = extractTextFromPortableText(post.body || [])
   const autoTags = detectTags(post.title, bodyText)
-  return { ...post, autoTags }
+  const readingTime = calculateReadingTimeFromPortableText(post.body || [])
+  return { ...post, autoTags, readingTime }
 })
 
 // 人気タグの取得
@@ -68,7 +70,7 @@ function formatDate(dateString: string) {
       
       <!-- TODO: 20記事以上になったらページネーション実装 -->
       <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
-        {posts.slice(0, 20).map((post) => (
+        {postsWithTags.slice(0, 20).map((post) => (
           <div class="max-w-3xl mx-auto">
             <article class="w-full bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
             {post.mainImage && (
@@ -89,9 +91,17 @@ function formatDate(dateString: string) {
                   {post.title}
                 </a>
               </h2>
-              <p class="text-gray-600 text-sm mb-4">
-                {formatDate(post.publishedAt || post._createdAt)}
-              </p>
+              <div class="flex items-center gap-4 text-gray-600 text-sm mb-4">
+                <time datetime={post.publishedAt || post._createdAt}>
+                  {formatDate(post.publishedAt || post._createdAt)}
+                </time>
+                <span class="flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  {formatReadingTime(post.readingTime)}
+                </span>
+              </div>
               <a
                 href={`/blog/${post.slug}/`}
                 class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
