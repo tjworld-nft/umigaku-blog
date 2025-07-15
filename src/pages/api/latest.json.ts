@@ -3,8 +3,8 @@ import { getPosts } from '../../lib/sanityClient';
 
 export const GET: APIRoute = async () => {
   try {
-    const posts = await getPosts();        // Sanity 内で publishedAt desc & limit 10
-    const latest = posts.slice(0, 20).map((p) => ({
+    const posts = await getPosts();        // Sanity 内で publishedAt desc（全記事取得）
+    const latest = posts.map((p) => ({
       title: p.title,
       slug:  p.slug,
       excerpt: p.body?.[0]?.children?.[0]?.text ?? p.body?.[0]?.value ?? '',

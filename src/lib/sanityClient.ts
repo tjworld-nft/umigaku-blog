@@ -28,7 +28,7 @@ export const getPosts = () =>
       }
     }, 
     publishedAt, _createdAt
-  }|order(coalesce(publishedAt, _createdAt) desc)[0..19]`);
+  }|order(coalesce(publishedAt, _createdAt) desc)`);
 
 export const getPost = (slug: string) =>
   client.fetch(`*[_type=="post" && slug.current == $slug][0]{
