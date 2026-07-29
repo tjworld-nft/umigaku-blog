@@ -8,8 +8,9 @@ export const client = createClient({
   token: import.meta.env.SANITY_READ_TOKEN,   // build 時のみ使用
 });
 
-// 注意: ビルドには書き込み可能なトークンを使うため、フィルタしないと下書き（drafts.*）まで
-// 本番サイトに出てしまう。一覧・詳細の両方で必ず drafts を除外すること。
+// 下書き（drafts.*）の除外。apiVersion 2025-02-19 以降は既定の perspective が `published` に
+// なったため現状これが無くても drafts は入らないが、apiVersion を下げる（2025-02-19 未満は
+// 既定が `raw`）か perspective を明示すると途端に下書きが本番へ出る。安全側に倒して明示する。
 export const getPosts = () =>
   client.fetch(`*[_type=="post" && defined(slug.current) && !(_id in path("drafts.**"))]{
     _id, title, "slug": slug.current, 

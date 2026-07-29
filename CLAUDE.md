@@ -85,8 +85,9 @@ frontmatter は `title` / `slug` が必須。`date` または `publishedAt`、`m
 書き込みトークンは `~/.config/sanity/miura-write-token`（600）に置く。
 発行元: https://www.sanity.io/manage/project/d2w2igz6/api → Tokens → Editor 権限。
 
-**下書き（`drafts.*`）はビルド対象から除外している**（`sanityClient.ts` の `!(_id in path("drafts.**"))`）。
-ビルドはトークン付きで Sanity を読むため、この除外を外すと下書きが本番に出るので消さないこと。
+**下書き（`drafts.*`）はビルド対象に入らない。** apiVersion `2025-02-19` 以降は Sanity 側の既定 perspective が
+`published` になったため。ただし apiVersion を 2025-02-19 未満に下げると既定が `raw` に戻って下書きが本番に出るため、
+`sanityClient.ts` のクエリに `!(_id in path("drafts.**"))` を明示してある。消さないこと。
 
 ### 記事公開後の流れ（自動）
 
