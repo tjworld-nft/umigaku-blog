@@ -8,7 +8,9 @@
     "preview": "astro preview",
     "astro": "astro",
     "deploy": "node scripts/deploy.js",
-    "build:deploy": "npm run build && npm run deploy"
+    "build:deploy": "npm run build && npm run deploy",
+    "post": "node scripts/post-to-sanity.mjs",
+    "deploy:remote": "bash scripts/deploy-remote.sh"
   },
   "dependencies": {
     "@portabletext/to-html": "^2.0.14",

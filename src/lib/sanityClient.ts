@@ -8,8 +8,10 @@ export const client = createClient({
   token: import.meta.env.SANITY_READ_TOKEN,   // build 時のみ使用
 });
 
+// 注意: ビルドには書き込み可能なトークンを使うため、フィルタしないと下書き（drafts.*）まで
+// 本番サイトに出てしまう。一覧・詳細の両方で必ず drafts を除外すること。
 export const getPosts = () =>
-  client.fetch(`*[_type=="post" && defined(slug.current)]{
+  client.fetch(`*[_type=="post" && defined(slug.current) && !(_id in path("drafts.**"))]{
     _id, title, "slug": slug.current, 
     mainImage{
       asset->{
@@ -31,7 +33,7 @@ export const getPosts = () =>
   }|order(coalesce(publishedAt, _createdAt) desc)`);
 
 export const getPost = (slug: string) =>
-  client.fetch(`*[_type=="post" && slug.current == $slug][0]{
+  client.fetch(`*[_type=="post" && slug.current == $slug && !(_id in path("drafts.**"))][0]{
     _id, title, "slug": slug.current, 
     mainImage{
       asset->{
