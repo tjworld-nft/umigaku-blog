@@ -126,7 +126,10 @@ function markdownToPortableText(md) {
     const img = t.match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/);
     if (img) {
       flush();
-      out.push({ _key: key(), _type: 'image', __localImage: img[2], __alt: img[1] });
+      // alt は記事ページの <img alt> にそのまま出るので、本物の alt フィールドに入れる
+      const block = { _key: key(), _type: 'image', __localImage: img[2] };
+      if (img[1]) block.alt = img[1];
+      out.push(block);
       continue;
     }
 
@@ -242,6 +245,9 @@ async function main() {
     slug: { _type: 'slug', current: meta.slug },
     body: blocks,
   };
+  // description は meta description / og:description に使われる。
+  // 入れないとサイト側が本文冒頭を切り出した文にフォールバックしてしまう。
+  if (meta.description) doc.description = meta.description;
   // publishedAt: 既存スキルの frontmatter は `date: 2026-08-01` 形式なので両方受ける
   const when = meta.publishedAt || meta.date;
   if (when) doc.publishedAt = /^\d{4}-\d{2}-\d{2}$/.test(when) ? `${when}T09:00:00.000Z` : when;
@@ -273,7 +279,6 @@ async function main() {
     process.stderr.write(`画像アップロード中: ${basename(abs)} ... `);
     const assetId = await uploadImage(abs, token);
     delete b.__localImage;
-    delete b.__alt;
     b.asset = { _type: 'reference', _ref: assetId };
     process.stderr.write('ok\n');
   }
