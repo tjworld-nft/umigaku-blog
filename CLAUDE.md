@@ -62,10 +62,32 @@ umigaku-blog/
    - **publishedAt**: 公開日時（未設定なら `_createdAt` が使われる）
 4. 「Publish」で公開 → Webhook が GitHub Actions を自動トリガー → デプロイ完了
 
-### 方法2: Claude の diving-blog スキルで記事生成
+### 方法2: Markdown を CLI で投入（推奨・自動化用）
 
-Claudeに「ブログを書いて」と依頼するとMarkdown記事を生成できる。
-生成後、Sanity に手動投入するか、Sanity API経由で投稿する。
+Claude に「ブログを書いて」と依頼して Markdown を生成し、そのまま Sanity に流し込む。
+
+```bash
+# 変換結果だけ確認（トークン不要）
+npm run post -- 記事.md --dry-run
+
+# 下書きとして投入（サイトには出ない）
+npm run post -- 記事.md
+
+# 公開ドキュメントとして投入（この後デプロイが必要）
+npm run post -- 記事.md --publish
+```
+
+frontmatter は `title` / `slug` が必須。`date` または `publishedAt`、`mainImage`（md からの相対パス）は任意。
+本文中の `![alt](./photo.jpg)` はローカル画像を Sanity にアップロードして埋め込む。
+`/license/` のような相対リンクは自動で `https://miura-diving.com/license/` に直す。
+同じ slug が既にあれば投入を中止する。
+
+書き込みトークンは `~/.config/sanity/miura-write-token`（600）に置く。
+発行元: https://www.sanity.io/manage/project/d2w2igz6/api → Tokens → Editor 権限。
+
+**下書き（`drafts.*`）はビルド対象に入らない。** apiVersion `2025-02-19` 以降は Sanity 側の既定 perspective が
+`published` になったため。ただし apiVersion を 2025-02-19 未満に下げると既定が `raw` に戻って下書きが本番に出るため、
+`sanityClient.ts` のクエリに `!(_id in path("drafts.**"))` を明示してある。消さないこと。
 
 ### 記事公開後の流れ（自動）
 
@@ -80,8 +102,15 @@ FTP デプロイ
 ```
 
 **手動でデプロイしたい場合:**
-- GitHub Actions の「Run workflow」を手動実行
+```bash
+npm run deploy:remote   # GitHub Actions を発火して完了まで監視（ローカルビルド不要）
+```
+- または GitHub Actions の「Run workflow」を手動実行
 - または `main` ブランチにプッシュ（自動トリガー）
+
+> Sanity で Publish しただけでは反映されない。必ず上のいずれかでデプロイを走らせること。
+> Webhook（repository_dispatch）が設定済みかは Sanity の Manage 画面で要確認。
+> 2026-05 以降のデプロイは手動実行のみで、webhook 起動の実績が無い。
 
 ---
 
