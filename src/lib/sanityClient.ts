@@ -10,7 +10,7 @@ export const client = createClient({
 
 export const getPosts = () =>
   client.fetch(`*[_type=="post" && defined(slug.current)]{
-    _id, title, "slug": slug.current, 
+    _id, title, "slug": slug.current, description,
     mainImage{
       asset->{
         _id,
@@ -32,7 +32,7 @@ export const getPosts = () =>
 
 export const getPost = (slug: string) =>
   client.fetch(`*[_type=="post" && slug.current == $slug][0]{
-    _id, title, "slug": slug.current, 
+    _id, title, "slug": slug.current, description,
     mainImage{
       asset->{
         _id,
