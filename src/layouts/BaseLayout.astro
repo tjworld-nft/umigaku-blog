@@ -23,6 +23,18 @@ const {
   dateModified,
   tags = []
 } = Astro.props
+
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin).href
+
+// FacebookのリンクプレビューはWebPを表示しない。SanityのCDNでJPEGに変換し、
+// 推奨サイズの1200x630に揃えてから og:image に渡す。
+const OG_W = 1200
+const OG_H = 630
+const ogImage = image
+  ? image.includes('cdn.sanity.io')
+    ? `${image.split('?')[0]}?w=${OG_W}&h=${OG_H}&fit=crop&fm=jpg&q=80`
+    : image
+  : undefined
 ---
 
 <!DOCTYPE html>
@@ -35,24 +47,34 @@ const {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <link rel="canonical" href={canonical} />
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={Astro.url} />
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="三浦 海の学校のブログ" />
+    <meta property="og:locale" content="ja_JP" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    {image && <meta property="og:image" content={image} />}
+    {ogImage && (
+      <>
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:image:width" content={String(OG_W)} />
+        <meta property="og:image:height" content={String(OG_H)} />
+        <meta property="og:image:alt" content={title} />
+      </>
+    )}
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={Astro.url} />
+    <meta property="twitter:url" content={canonical} />
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
-    {image && <meta property="twitter:image" content={image} />}
+    {ogImage && <meta property="twitter:image" content={ogImage} />}
     <!-- Structured Data -->
     <StructuredData
       type={type}
       title={title}
       description={description}
-      url={Astro.url.href}
+      url={canonical}
       image={image}
       datePublished={datePublished}
       dateModified={dateModified}
