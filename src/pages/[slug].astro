@@ -94,7 +94,9 @@ if (post) {
 }
 
 const pageTitle = seoData ? seoData.ogTitle : '記事が見つかりません'
-const pageDescription = seoData ? seoData.metaDescription : ''
+// 記事が description を持っていればそれを使う。持たない過去記事は
+// 本文冒頭を切り出す自動生成にフォールバックする。
+const pageDescription = post?.description?.trim() || (seoData ? seoData.metaDescription : '')
 // SEOキーワードにタグを追加
 const baseKeywords = seoData ? seoData.keywords : []
 const allKeywords = [...baseKeywords, ...autoTags].join(', ')

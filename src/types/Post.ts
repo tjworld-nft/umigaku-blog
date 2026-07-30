@@ -2,6 +2,8 @@ export interface Post {
   _id: string
   title: string
   slug: string
+  /** 記事側で明示した meta/og description。無い記事は本文からの自動生成にフォールバックする */
+  description?: string
   mainImage?: {
     asset: {
       _ref: string
