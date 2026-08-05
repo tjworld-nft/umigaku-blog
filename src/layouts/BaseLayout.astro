@@ -24,6 +24,10 @@ const {
   tags = []
 } = Astro.props
 
+// ファビコンは base が '/blog' なので public/ の中身が /blog/ 配下に出る。
+// head のリンクをルート直下（/favicon.ico）にすると miura-diving.com 側を
+// 見にいって404になり、タブが地球儀のままになる。
+
 // 一覧ページは Astro.url.pathname が "/blog"（末尾スラッシュ無し）になる。
 // 実際の配信は /blog/ なので、拡張子が無いパスは末尾スラッシュに正規化する。
 const rawPath = Astro.url.pathname
@@ -56,7 +60,10 @@ const ogImage = image
     <meta name="description" content={description} />
     {keywords && <meta name="keywords" content={keywords} />}
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/blog/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/blog/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/blog/favicon-32x32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/blog/apple-touch-icon.png" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <link rel="canonical" href={canonical} />
