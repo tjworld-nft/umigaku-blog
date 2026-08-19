@@ -1,0 +1,42 @@
+---
+// 記事末尾の「関連するまんが」— 本体サイト /manga/ への内部リンク。
+import { MANGA_BASE, type MangaEpisode } from '../lib/relatedManga'
+
+interface Props {
+  episodes: MangaEpisode[]
+}
+const { episodes } = Astro.props
+---
+
+{episodes.length > 0 && (
+  <aside class="mt-8 sm:mt-10 pt-6 border-t border-gray-200" aria-labelledby="related-manga-title">
+    <p id="related-manga-title" class="text-gray-600 font-medium mb-3 flex items-center gap-2">
+      <span class="inline-block text-xs font-bold text-pink-600 border border-pink-400 rounded-full px-2 py-0.5">まんが</span>
+      この記事に関係するまんが（無料・1作3〜4分）
+    </p>
+    <ul class="grid gap-3 sm:grid-cols-2">
+      {episodes.map((e) => (
+        <li>
+          <a
+            href={`${MANGA_BASE}${e.slug}/`}
+            class="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 hover:bg-teal-50 hover:border-teal-300 transition-colors"
+          >
+            <img
+              src={`https://miura-diving.com/image/manga/${e.slug}/cover.webp`}
+              alt=""
+              width="560"
+              height="750"
+              loading="lazy"
+              class="w-12 h-16 object-cover object-top rounded border border-gray-200 flex-none"
+            />
+            <span class="min-w-0">
+              <b class="block text-sm font-bold text-gray-900 leading-snug">第{e.ep}話 {e.short}</b>
+              <small class="block text-xs text-gray-600 leading-snug mt-0.5">{e.lead}</small>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <a href={MANGA_BASE} class="inline-block mt-3 text-sm font-bold text-teal-700 hover:underline">まんが一覧を見る →</a>
+  </aside>
+)}

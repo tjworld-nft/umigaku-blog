@@ -5,6 +5,8 @@ import { toHTML } from '@portabletext/to-html'
 import { generateSEOData } from '../lib/seoGenerator'
 import { detectTags, extractTextFromPortableText, getTagColor } from '../lib/autoTagger'
 import { calculateReadingTimeFromPortableText, formatReadingTime } from '../lib/readingTime'
+import RelatedManga from '../components/RelatedManga.astro'
+import { pickRelatedManga } from '../lib/relatedManga'
 import type { Post } from '../types/Post'
 
 export async function getStaticPaths() {
@@ -87,10 +89,13 @@ const seoData = post ? generateSEOData(post.title, post.body || []) : null
 // 自動タグ生成
 let autoTags: string[] = []
 let readingTime = 1
+let relatedManga: ReturnType<typeof pickRelatedManga> = []
 if (post) {
   const bodyText = extractTextFromPortableText(post.body || [])
   autoTags = detectTags(post.title, bodyText)
   readingTime = calculateReadingTimeFromPortableText(post.body || [])
+  // 本体サイトの解説まんがから関連話を最大2つ（記事末尾に出す）
+  relatedManga = pickRelatedManga(post.title, bodyText)
 }
 
 const pageTitle = seoData ? seoData.ogTitle : '記事が見つかりません'
@@ -170,6 +175,9 @@ const pageImage = post?.mainImage?.asset?.url
             </div>
           )}
           
+          <!-- 関連するまんが（本体サイト /manga/ への導線） -->
+          <RelatedManga episodes={relatedManga} />
+
           <!-- SNSシェアボタン -->
           <div class="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-gray-200">
             <p class="text-gray-600 font-medium mb-3 sm:mb-4">この記事をシェア</p>
