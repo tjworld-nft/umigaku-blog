@@ -11,6 +11,7 @@ export interface Props {
   datePublished?: string
   dateModified?: string
   tags?: string[]
+  robots?: string
 }
 
 const { 
@@ -21,7 +22,8 @@ const {
   type = 'website',
   datePublished,
   dateModified,
-  tags = []
+  tags = [],
+  robots
 } = Astro.props
 
 // ファビコンは base が '/blog' なので public/ の中身が /blog/ 配下に出る。
@@ -57,7 +59,7 @@ const ogImage = image
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content={description} />
+    <meta name="description" content={description} />{robots && <meta name="robots" content={robots} />}
     {keywords && <meta name="keywords" content={keywords} />}
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/x-icon" href="/blog/favicon.ico" />

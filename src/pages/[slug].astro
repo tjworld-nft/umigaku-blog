@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { getPost, getPosts } from '../lib/sanityClient'
+import { NOINDEX } from '../lib/seoExclusions'
 import { toHTML } from '@portabletext/to-html'
 import { generateSEOData } from '../lib/seoGenerator'
 import { detectTags, extractTextFromPortableText, getTagColor } from '../lib/autoTagger'
@@ -123,6 +124,7 @@ const dateModified = post?._updatedAt && datePublished &&
   datePublished={datePublished}
   dateModified={dateModified}
   tags={autoTags}
+  robots={post && NOINDEX.has(post.slug) ? 'noindex, follow' : undefined}
 >
   {error || !post ? (
     <div class="text-center py-12">

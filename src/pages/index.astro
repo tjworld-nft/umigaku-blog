@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { getPosts } from '../lib/sanityClient'
+import { REDIRECTED } from '../lib/seoExclusions'
 import { detectTags, extractTextFromPortableText, getPopularTags } from '../lib/autoTagger'
 import { calculateReadingTimeFromPortableText, formatReadingTime } from '../lib/readingTime'
 import type { Post } from '../types/Post'
@@ -11,7 +12,7 @@ let posts: Post[] = []
 let error = ''
 
 try {
-  posts = await getPosts()
+  posts = (await getPosts()).filter((post: Post) => !REDIRECTED.has(post.slug))
 } catch (err) {
   error = '記事の取得に失敗しました'
   console.error('Error fetching posts:', err)
