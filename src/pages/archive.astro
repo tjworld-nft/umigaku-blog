@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { getPostSummaries } from '../lib/sanityClient'
+
+// 全記事への通常のHTMLリンクを、追加操作なしで表示する。
+const posts = await getPostSummaries()
+
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString('ja-JP', {
+    year: 'numeric', month: 'long', day: 'numeric',
+  })
+}
+---
+
+<BaseLayout
+  title="全記事一覧｜三浦 海の学校のブログ"
+  description="三浦 海の学校のブログ全記事一覧。ダイビングの始め方、ライセンス、ファンダイビング、三浦の海の情報を、新しい順にご覧いただけます。"
+>
+  <nav aria-label="パンくずリスト" class="text-sm text-gray-600">
+    <a href="/blog/" class="text-teal-700 hover:underline">ブログ</a>
+    <span aria-hidden="true" class="mx-2">/</span>
+    <span aria-current="page">全記事一覧</span>
+  </nav>
+
+  <header>
+    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">全記事一覧</h1>
+    <p class="text-gray-600">これまで公開した{posts.length}件の記事を、新しい順にまとめています。</p>
+  </header>
+
+  <ol class="divide-y divide-gray-200 rounded-lg bg-white shadow-sm">
+    {posts.map((post) => (
+      <li class="flex flex-col sm:flex-row gap-2 sm:gap-6 p-4 sm:p-6">
+        <time datetime={post.publishedAt || post._createdAt} class="text-sm text-gray-500 shrink-0 sm:w-32">
+          {formatDate(post.publishedAt || post._createdAt)}
+        </time>
+        <a href={`/blog/${post.slug}/`} class="font-medium text-teal-800 hover:underline break-words">
+          {post.title}
+        </a>
+      </li>
+    ))}
+  </ol>
+
+  <p><a href="/blog/" class="text-teal-700 hover:underline">最新記事に戻る</a></p>
+</BaseLayout>

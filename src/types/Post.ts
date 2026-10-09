@@ -15,5 +15,9 @@ export interface Post {
   body?: any[]
   publishedAt?: string
   _createdAt: string
+  _updatedAt?: string
   autoTags?: string[] // 自動生成されたタグ
 }
+
+/** 本文・画像を取得しない、記事へのリンク一覧用データ。 */
+export type PostSummary = Pick<Post, 'title' | 'slug' | 'publishedAt' | '_createdAt'>
