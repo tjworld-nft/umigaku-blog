@@ -106,6 +106,12 @@ const pageDescription = post?.description?.trim() || (seoData ? seoData.metaDesc
 const baseKeywords = seoData ? seoData.keywords : []
 const allKeywords = [...baseKeywords, ...autoTags].join(', ')
 const pageImage = post?.mainImage?.asset?.url
+const datePublished = post?.publishedAt || post?._createdAt
+// 手動設定した公開日よりCMSの更新日が古い記事もあるため、前後を揃える。
+const dateModified = post?._updatedAt && datePublished &&
+  Date.parse(post._updatedAt) > Date.parse(datePublished)
+  ? post._updatedAt
+  : datePublished
 ---
 
 <BaseLayout 
@@ -114,8 +120,8 @@ const pageImage = post?.mainImage?.asset?.url
   keywords={allKeywords}
   image={pageImage}
   type="article"
-  datePublished={post?.publishedAt || post?._createdAt}
-  dateModified={post?._updatedAt || post?.publishedAt || post?._createdAt}
+  datePublished={datePublished}
+  dateModified={dateModified}
   tags={autoTags}
 >
   {error || !post ? (
