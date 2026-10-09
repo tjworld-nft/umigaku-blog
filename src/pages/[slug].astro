@@ -115,7 +115,7 @@ const pageImage = post?.mainImage?.asset?.url
   image={pageImage}
   type="article"
   datePublished={post?.publishedAt || post?._createdAt}
-  dateModified={post?._createdAt}
+  dateModified={post?._updatedAt || post?.publishedAt || post?._createdAt}
   tags={autoTags}
 >
   {error || !post ? (

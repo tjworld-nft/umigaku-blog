@@ -15,5 +15,6 @@ export interface Post {
   body?: any[]
   publishedAt?: string
   _createdAt: string
+  _updatedAt?: string
   autoTags?: string[] // 自動生成されたタグ
 }
