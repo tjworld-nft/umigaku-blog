@@ -1,10 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { getPosts } from '../lib/sanityClient'
-import type { Post } from '../types/Post'
+import { getPostSummaries } from '../lib/sanityClient'
 
 // 全記事への通常のHTMLリンクを、追加操作なしで表示する。
-const posts: Post[] = await getPosts()
+const posts = await getPostSummaries()
 
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString('ja-JP', {

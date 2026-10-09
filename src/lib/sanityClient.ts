@@ -1,4 +1,5 @@
 import { createClient } from '@sanity/client';
+import type { PostSummary } from '../types/Post';
 
 export const client = createClient({
   projectId: import.meta.env.SANITY_PROJECT_ID,
@@ -8,6 +9,12 @@ export const client = createClient({
   perspective: 'published', // 一覧・記事・サイトマップには公開済みの版だけを使う
   token: import.meta.env.SANITY_READ_TOKEN,   // build 時のみ使用
 });
+
+// アーカイブとサイトマップで共有する、公開記事の軽量な一覧。
+export const getPostSummaries = () =>
+  client.fetch<PostSummary[]>(`*[_type=="post" && defined(slug.current)]{
+    title, "slug": slug.current, publishedAt, _createdAt
+  }|order(coalesce(publishedAt, _createdAt) desc)`);
 
 export const getPosts = () =>
   client.fetch(`*[_type=="post" && defined(slug.current)]{
