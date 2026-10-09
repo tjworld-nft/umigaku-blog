@@ -1,16 +1,22 @@
 import type { APIRoute } from 'astro';
 import { getPosts } from '../../lib/sanityClient';
+import { REDIRECTED } from '../../lib/seoExclusions';
+import type { Post } from '../../types/Post';
+
+type LatestPost = Omit<Post, 'mainImage'> & { mainImage?: { asset?: { url?: string } } };
 
 export const GET: APIRoute = async () => {
   try {
-    const posts = await getPosts();        // Sanity 内で publishedAt desc（全記事取得）
-    const latest = posts.map((p) => ({
-      title: p.title,
-      slug:  p.slug,
-      excerpt: p.body?.[0]?.children?.[0]?.text ?? p.body?.[0]?.value ?? '',
-      date:  p.publishedAt?.substring(0,10) ?? p._createdAt?.substring(0,10),
-      image: p.mainImage?.asset?.url ?? '',
-    }));
+    const posts: LatestPost[] = await getPosts(); // Sanity 内で publishedAt desc（全記事取得）
+    const latest = posts
+      .filter((p) => !REDIRECTED.has(p.slug))
+      .map((p) => ({
+        title: p.title,
+        slug:  p.slug,
+        excerpt: p.body?.[0]?.children?.[0]?.text ?? p.body?.[0]?.value ?? '',
+        date:  p.publishedAt?.substring(0,10) ?? p._createdAt?.substring(0,10),
+        image: p.mainImage?.asset?.url ?? '',
+      }));
     
     return new Response(JSON.stringify(latest), {
       headers: { 

@@ -1,9 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { getPostSummaries } from '../lib/sanityClient'
+import { REDIRECTED } from '../lib/seoExclusions'
 
 // 全記事への通常のHTMLリンクを、追加操作なしで表示する。
-const posts = await getPostSummaries()
+const posts = (await getPostSummaries()).filter(post => !REDIRECTED.has(post.slug))
 
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString('ja-JP', {

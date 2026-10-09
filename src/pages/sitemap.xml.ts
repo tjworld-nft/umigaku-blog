@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getPostSummaries } from '../lib/sanityClient';
+import { NOINDEX, REDIRECTED } from '../lib/seoExclusions';
 
 export const prerender = true;
 
@@ -14,7 +15,9 @@ export const GET: APIRoute = async ({ site }) => {
 
   // 取得に失敗したらビルドを止め、記事の抜けたサイトマップを公開しない。
   const posts = await getPostSummaries();
-  const paths = ['/blog/', '/blog/archive/', ...posts.map((post) => `/blog/${post.slug}/`)];
+  const paths = ['/blog/', '/blog/archive/', ...posts
+    .filter((post) => !REDIRECTED.has(post.slug) && !NOINDEX.has(post.slug))
+    .map((post) => `/blog/${post.slug}/`)];
   const urls = [...new Set(paths.map((path) => new URL(path, site).href))];
   // 記事のJSON-LDにはCMS文書の更新日時を使う。このサイトマップは
   // URLの発見を目的とする最小構成とし、省略可能なlastmodは付けない。
