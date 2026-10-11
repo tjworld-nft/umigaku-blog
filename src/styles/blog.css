@@ -22,10 +22,13 @@
   --border: #e3ebef;
   --footer: #2d3436;
 
-  /* 書体は本体サイトと同じ1種類。本文だけ別の書体にすると、記事を開いた瞬間に別のサイトに見える */
-  --ff-head: 'Zen Maru Gothic', 'Rounded Mplus 1c', 'Hiragino Maru Gothic ProN', sans-serif;
-  --ff-read: var(--ff-head);
-  --ff-accent: 'Montserrat', var(--ff-head);
+  /* 題名・見出し・ボタンなど太い文字は、本体サイトと同じ Zen Maru Gothic（太字だけ読み込む）。
+     本文は端末の書体（iPhone・Mac は丸ゴシック、Android・Windows は標準のゴシック）。
+     本文まで Web フォントにすると、記事1本で約900KB（写真の20倍）を読み込むことになるのでやめた。
+     本体サイトも、初めての表示では同じ端末の書体で出ている（display=optional）。 */
+  --ff-head: 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic Medium', 'Yu Gothic', Meiryo, sans-serif;
+  --ff-read: 'Hiragino Maru Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic Medium', 'Yu Gothic', Meiryo, sans-serif;
+  --ff-accent: var(--ff-head);
 
   --hdr: 56px;
   --page: 1120px;
@@ -48,7 +51,7 @@ html.nav-open {
 }
 body {
   margin: 0;
-  font-family: var(--ff-head);
+  font-family: var(--ff-read);
   font-size: 16px;
   line-height: 1.75;
   color: var(--text);
@@ -83,6 +86,11 @@ a {
   outline: 3px solid #ffb020;
   outline-offset: 3px;
   border-radius: 8px;
+}
+:is(h1, h2, h3, h4, b, .header-logo, .desktop-nav a, .mobile-nav-panel > a, .btn-line, .btn-outline, .link-arrow, .link-back,
+  .cat-nav a, .card-cat, .cat-link, .byline a, .ask-links a, .mobile-cta-bar a, .starters li a, .pager a, .archive-list a, .share a, .share button) {
+  font-family: var(--ff-head);
+  font-weight: 700;
 }
 :is(h1, h2, h3) {
   color: var(--ink);

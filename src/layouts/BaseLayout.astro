@@ -99,7 +99,7 @@ const year = new Date().getFullYear()
     <link rel="preconnect" href="https://cdn.sanity.io" crossorigin />
     {preload && <link rel="preload" as="image" href={preload.href} imagesrcset={preload.srcset} imagesizes={preload.sizes} fetchpriority="high" />}
 
-    <!-- Webフォントは本体サイトと同じ指定（同じURLなので、本体を見た人はキャッシュ済み）。
+    <!-- Webフォントは太字（題名・見出し・ボタン）だけ。本文は端末の書体（blog.css の先頭を参照）。
          表示は止めない：間に合わなければ端末の書体で描き、あとから差し替えない -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -107,10 +107,10 @@ const year = new Date().getFullYear()
       rel="stylesheet"
       media="print"
       onload="this.media='all'"
-      href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700&family=Montserrat:wght@600;700&display=optional"
+      href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700&display=optional"
     />
     <noscript>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700&family=Montserrat:wght@600;700&display=optional" />
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700&display=optional" />
     </noscript>
 
     {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
