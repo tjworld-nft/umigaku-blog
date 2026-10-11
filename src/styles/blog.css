@@ -436,6 +436,9 @@ button.btn-outline {
   letter-spacing: 0.01em;
   margin-top: 0.5rem;
 }
+.post-title .t-seg {
+  display: inline-block;
+}
 .byline {
   display: flex;
   align-items: center;

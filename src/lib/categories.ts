@@ -88,28 +88,89 @@ const RULES: [CategoryId, RegExp][] = [
 ]
 
 // ---------------------------------------------------------------------------
-// 過去記事のうち、タイトルからの判定では外れるもの（1本ずつ確かめて決めた）
+// 2026-10-12 時点で一覧に出している記事は、1本ずつ確かめてここに固定してある
+// （題を直してもカテゴリが動かないように。題からの判定は、これより後に書く記事にだけ効く）。
 // ---------------------------------------------------------------------------
 const OVERRIDES: Record<string, CategoryId> = {
-  // 題名に「PADI」「認定」が入るが、中身はアドバンス講習
-  'miura-aow-deep-boat-2026-09-05': 'step-up',
-  'miura-boat-ikada-aow-deep-2026-08-27': 'step-up',
-  'miura-aow-certification-dive-2026-08-02': 'step-up',
-  'miura-diving-aow-course-buddies': 'step-up',
-  'padi-jr-aow-k-chan': 'step-up',
-  // Cカードを取ったあとの続け方
-  'miura-diving-after-c-card-2026-08-05': 'step-up',
-  // 主題は海況と中止の判断（ドライスーツの採寸は後半）
-  'miura-sea-closed-drysuit-fitting-2026-09-07': 'miura-sea',
-  // ファンダイビングの日の記録
-  'miura-fun-diving-action-camera-2026-08-11': 'miura-sea',
-  'miura-diving-boat-dive-maguro-don': 'miura-sea',
-  'miura-fun-diving-ogasawara-20250727': 'miura-sea',
-  'miura-diving-repeater-ai-talk-20250826': 'miura-sea',
-  // スノーケリング
-  'snorkeling-tour-k-san-20250822': 'beginner',
-  // 講習で使うプールの話
-  'miura-diving-pool-merit': 'license',
+  'diving-license-winter-miura-2026-10-10': 'license', // 冬にダイビングライセンスは取れる？三浦なら実技2日・
+  'miura-4beach-experience-dives-2026-09-16': 'step-up', // 1日4本のビーチダイビングは4つの違う海｜三浦で経験
+  'miura-owd-swim-fin-2026-09-12': 'license', // 三浦のPADIオープンウォーター講習｜泳いでいた人は
+  'miura-jogashima-boat-buoyancy-fin-2026-09-11': 'step-up', // 城ヶ島ボートで浮力とフィンの練習｜生き物を見ない日の
+  'miura-owd-certified-next-day-2026-09-09': 'license', // 中止の翌日に認定ダイブ｜神奈川・三浦の城ヶ島でPAD
+  'miura-sea-closed-drysuit-fitting-2026-09-07': 'miura-sea', // 城ヶ島のダイビングを海況不良でクローズにした日｜中止
+  'miura-owd-aow-rain-bcd-2026-09-06': 'license', // 三浦のPADI講習、大雨でも海の中は水温24度｜BC
+  'miura-aow-deep-boat-2026-09-05': 'step-up', // 宮川湾でアドバンス講習のディープとボート｜経験本数が
+  'miura-owd-equalizing-aow-2026-09-04': 'license', // 耳抜きはゆっくり少しずつ｜水温24度の三浦でオープン
+  'miura-drysuit-fitting-mobby-2026-09-04': 'step-up', // ドライスーツの採寸に行ってきました｜三浦の冬を自分の
+  'miura-enriched-air-weight-check-2026-09-02': 'step-up', // 適正ウェイトの決め方｜三浦・城ヶ島でエンリッチドエア
+  'miura-snorkeling-university-class-2026-09-01': 'beginner', // 三浦・荒井浜で大学のスノーケリング授業｜泳ぎが苦手で
+  'miura-owd-certification-buoyancy-2026-08-30': 'license', // 浮力は深さで変わる｜水温23度の三浦でオープンウォー
+  'miura-owd-pool-ocean-training-2026-08-29': 'license', // 曇り空の三浦でオープンウォーター講習1日目｜プールか
+  'miura-diving-logbook-app-2026-08-29': 'news', // ダイビングのログブックに何を書く？三浦のスクールが作
+  'ai-consult-button-2026-08-28': 'news', // お店に聞く前にAIに相談｜三浦 海の学校のサイトに付
+  'miura-boat-ikada-aow-deep-2026-08-27': 'step-up', // 筏から潜る三浦のボートダイビング｜水深20m超、透明
+  'miura-mask-snorkel-choosing-2026-08-26': 'step-up', // ダイビングのマスクの選び方｜講習が中止になった日に器
+  'miura-typhoon-swell-closure-2026-08-25': 'miura-sea', // 台風のうねりで三浦のダイビングを中止にする日｜判断の
+  'miura-owd-certification-dives-2026-08-25': 'license', // 台風のうねりが残る三浦でオープンウォーター認定｜マス
+  'miura-snorkeling-owd-course-2026-08-23': 'license', // スノーケリング体験とライセンス講習を同じ日に｜8月の
+  'miura-jogashima-fun-trial-2026-08-22': 'beginner', // 三浦・城ヶ島でファンダイビングと体験ダイビング｜水温
+  'miura-miyagawa-2boat-ishigaki-training-2026-08-21': 'step-up', // 石垣島の旅行前に三浦でスキル練習｜宮川湾2ボートダイ
+  'miura-boat-buoyancy-practice-2026-08-20': 'step-up', // 浮力コントロールだけを練習する日｜宮川湾ボートで自由
+  'miura-refresh-diving-3years-2026-08-19': 'beginner', // 3年ぶりの海へ｜三浦のリフレッシュダイビングで戻るも
+  'miura-refresh-fun-3dives-2026-08-19': 'beginner', // 3年ぶりのリフレッシュと月1ダイバー｜城ヶ島で3本潜
+  'miura-fun-diving-oval-squid-2026-08-17': 'sea-life', // アオリイカの卵と親イカに会えた城ヶ島｜8月のファンダ
+  'miura-trial-diving-junior-2026-08-16': 'beginner', // 10歳・11歳の体験ダイビング｜城ヶ島で子どもが呼吸
+  'miura-aow-boat-certification-2026-08-15': 'step-up', // 宮川湾のボートでアドバンス講習修了｜深場の光と浮力、
+  'miura-owd-aow-fun-trial-2026-08-14': 'license', // 豪雨明けの三浦で新しいPADIダイバーが4名｜5コー
+  'miura-owd-aow-clear-day-2026-08-13': 'license', // 初めてのダイビング講習、緊張がほどける順番｜水温24
+  'miura-owd-aow-set-2026-08-12': 'license', // OWDとAOWを同時に取るのはあり？三浦で一番人気の
+  'miura-fun-diving-action-camera-2026-08-11': 'miura-sea', // アクションカメラで三浦の海を撮る｜城ヶ島ファンダイビ
+  'miura-aow-day1-trial-diving-2026-08-10': 'step-up', // アドバンス講習1日目と体験ダイビング｜三浦でコンパス
+  'miura-owd-certification-buoyancy-2026-08-09': 'license', // 浮力コントロールが変わった最後の1本｜城ヶ島でオープ
+  'miura-owd-family-pool-ocean-2026-08-08': 'license', // 親子3人でダイビングライセンス講習｜三浦・城ヶ島のプ
+  'miura-owd-aow-lionfish-2026-08-07': 'license', // うねりの入った城ヶ島でOWD講習とアドバンス講習｜砂
+  'miura-owd-chatgpt-typhoon-2026-08-06': 'license', // ChatGPTに勧められて三浦へ｜台風明けのオープン
+  'diving-license-nissu-2days-2026-08-05': 'license', // ダイビングライセンスは何日で取れる？三浦なら学科は自
+  'miura-diving-after-c-card-2026-08-05': 'step-up', // Cカードを取ったあとどうする？三浦のインストラクター
+  'miura-diving-typhoon13-swell-close-2026-08-05': 'miura-sea', // 台風が沖縄にいても三浦の海が荒れる理由｜うねりでクロ
+  'miura-junior-open-water-2026-08-03': 'license', // 11歳のジュニアOWD講習｜台風前のうねる三浦の海で
+  'miura-aow-certification-dive-2026-08-02': 'step-up', // 三浦でアドバンス認定ダイブ｜水面27度・水底19度、
+  'miura-boat-diving-miyagawa-2026-07-31': 'miura-sea', // 宮川湾ボートダイビング｜7月末でも水温21度、夏の海
+  'miura-diving-typhoon-season-2026-07-30': 'miura-sea', // 台風でダイビングは中止になる？三浦半島の海が荒れる仕
+  'miura-fun-diving-3beach-4beach-2026-07-31': 'miura-sea', // 夏の三浦は1日3本・4本潜れる｜ファンダイビングの本
+  'miura-diving-tsuzukeru-wari-2026-07-30': 'news', // ダイビングが続かないのは意志の問題じゃない｜三浦の特
+  'miura-diving-buddy-discount-2026-08-01': 'news', // 友達を誘うとふたりとも得をする｜三浦のお友達紹介「バ
+  'miura-diving-umiushi-season-2026-05-06': 'sea-life', // 5月の三浦はウミウシが豊作｜10年以上前の顔ぶれが戻
+  'miura-diving-report-20260420': 'sea-life', // うねりの三浦で久しぶりのキヌバリ｜4月の透明度3〜4
+  'miura-diving-report-20260416': 'step-up', // 300本超えのベテランがフィンワークを練習する理由｜
+  'diving-license-hiyou-souba-2026-04-15': 'license', // ダイビングライセンスの費用はいくら？三浦の総額と料金
+  'miura-diving-ray-nudibranch-2026-04-14': 'sea-life', // 4月の三浦ダイビング｜迷子のアカエイと、ゴマフビロー
+  'diving-kowai-kokufuku-2026-04-11': 'beginner', // ダイビングが怖い人へ、原因別の5つの慣らし方｜三浦の
+  'diving-hitori-sanka-2026-04-11': 'beginner', // ダイビングは一人で参加できる？三浦での集合から当日の
+  'oyogenai-diving-2026-04-11': 'beginner', // 泳げなくてもダイビングはできる？器材で補えることと、
+  'miura-diving-report-20250409': 'sea-life', // 水深2mでネコザメに会えた春の三浦ダイビング｜ウミウ
+  'kanto-diving-osusume-2026-04-10': 'beginner', // 関東のダイビングエリア5つを比べる｜伊豆・三浦・館山
+  'diving-license-kanagawa-guide-2026-04-05': 'license', // 神奈川でダイビングライセンスを取るには？費用・日数と
+  'diving-license-kanagawa-miura-umiushi-2026-04-04': 'license', // 雨の日のダイビングライセンス認定ダイブ｜4月の三浦で
+  'miura-diving-2026-03-29': 'sea-life', // 3月末の三浦ビーチダイビング｜ダンゴウオ探しとセトイ
+  'miura-nekozame-spring-diving-2026': 'sea-life', // 巨大ネコザメと春のウミウシ4種｜新しいBCDを慣らす
+  '2026-03-23': 'sea-life', // ダンゴウオを探して小雨の三浦へ｜ウミウシ5種とヒラタ
+  '2026-03-21': 'sea-life', // 春濁りの三浦で会えたウミウシ4種｜3月下旬のビーチダ
+  '2026-03-16': 'sea-life', // 春濁りの三浦でタツノオトシゴとムカデミノウミウシ｜3
+  'miura-diving-new-gear-pool-day': 'step-up', // ダイビング器材を買ったら最初にすること｜ウェイトチェ
+  'miura-diving-aow-course-deep-boat': 'step-up', // ディープダイビングで色が消える？三浦・宮川湾のアドバ
+  'miura-diving-owd-english-ai-course': 'license', // 英語でダイビング講習はできる？三浦でAIの日英スライ
+  'drysuit-course-fundive-repeaters-20250824': 'step-up', // 真夏にドライスーツ講習を受ける理由｜三浦の8月、陸は
+  'fundiving-s-san-my-gear-20250819': 'step-up', // ダイビング器材を自分で持つ4つの理由｜月1で潜るSさ
+  'owd-final-day-n-san-20250817': 'license', // 三浦でダイビングライセンス講習の最終日｜透明度2mの
+  'owd-course-day1-report-20250813': 'license', // ダイビングライセンス講習1日目で練習する4つのスキル
+  'pool-diving-refresh-bubblemaker-20250811': 'beginner', // 三浦でリフレッシュダイビングと9歳のバブルメーカー｜
+  'miura-diving-blank-diver-revival-20250731': 'beginner', // 70歳を過ぎてダイビングに復帰｜何十年ぶりのブランク
+  'miura-snorkeling-experience-20250727': 'beginner', // おじいちゃんと10歳の孫で三浦スノーケリング体験｜器
+  'miura-refresh-diving-ika-hatchout': 'sea-life', // リフレッシュダイビングの日にアオリイカの孵化を見た｜
+  'miura-diving-aow-course-report': 'step-up', // 三浦のアドバンス講習で何をする？中性浮力・ナビ・水中
+  'miura-diving-owd-report-20250712': 'license', // 友達の付き添いでファンダイビング｜三浦のライセンス講
+  'diving-license-padi-reason': 'license', // ダイビングライセンスの指導団体はどこがいい？三浦の講
 }
 
 export function classify(post: { slug: string; title: string; category?: unknown }): CategoryId {

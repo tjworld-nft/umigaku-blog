@@ -27,6 +27,7 @@ interface Props {
 const { post } = Astro.props
 const category = getCategory(post.category)
 const categoryUrl = `${BLOG_PATH}category/${category.id}/`
+const titleParts = post.title.split('｜')
 
 const listed = await getListedPosts()
 const related = relatedPosts(post, listed, 3)
@@ -74,7 +75,10 @@ const heroWidth = hero ? Math.min(hero.w ?? 1360, 1360) : 0
         </span>
         <span>約{post.minutes}分</span>
       </p>
-      <h1 class="post-title">{post.title}</h1>
+      <h1 class="post-title">
+        {/* 「｜」で区切った前半と後半を、それぞれひとかたまりで折り返す（「｜」が行の頭に来ないように） */}
+        {titleParts.map((part, i) => <span class="t-seg">{part}{i < titleParts.length - 1 ? '｜' : ''}</span>)}
+      </h1>
       <p class="byline">
         <img src={`${BLOG_PATH}author-yoshida.webp`} alt="" width="36" height="36" decoding="async" />
         <span><a href={AUTHOR.url}>{AUTHOR.name}</a>｜{AUTHOR.role}</span>
