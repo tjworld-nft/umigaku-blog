@@ -1,0 +1,17 @@
+---
+import { SITE, BLOG_PATH } from '../lib/site'
+interface Props {
+  /** ホーム・ブログのあとに続く項目。最後の項目に href が無ければ現在地 */
+  items?: { label: string; href?: string }[]
+}
+const { items = [] } = Astro.props
+const all = [{ label: 'ホーム', href: `${SITE}/` }, { label: 'ブログ', href: items.length ? BLOG_PATH : undefined }, ...items]
+---
+
+<nav class="crumbs" aria-label="パンくずリスト">
+  <ol>
+    {all.map((item) => (
+      <li>{item.href ? <a href={item.href}>{item.label}</a> : <span aria-current="page">{item.label}</span>}</li>
+    ))}
+  </ol>
+</nav>

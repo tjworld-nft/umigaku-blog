@@ -1,0 +1,49 @@
+---
+// 一覧の2ページ目以降（/blog/page/2/ …）。「もっと見る」のボタンをやめて、普通のページ送りにした。
+// 戻るボタンで元の位置に戻れる・URLを人に送れる・JavaScriptが無くても全部たどれる。
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import Breadcrumbs from '../../components/Breadcrumbs.astro'
+import CategoryNav from '../../components/CategoryNav.astro'
+import PostCard from '../../components/PostCard.astro'
+import Pages from '../../components/Pages.astro'
+import { getListedPosts } from '../../lib/posts'
+import { listSchema } from '../../lib/schema'
+import { BLOG_NAME, BLOG_PATH, PER_PAGE, SITE } from '../../lib/site'
+import type { Post } from '../../types/Post'
+
+export async function getStaticPaths() {
+  const posts = await getListedPosts()
+  const total = Math.ceil(posts.length / PER_PAGE)
+  return Array.from({ length: Math.max(0, total - 1) }, (_, i) => i + 2).map((page) => ({
+    params: { page: String(page) },
+    props: { page, total, posts: posts.slice((page - 1) * PER_PAGE, page * PER_PAGE), all: posts },
+  }))
+}
+
+interface Props {
+  page: number
+  total: number
+  posts: Post[]
+  all: Post[]
+}
+const { page, total, posts, all } = Astro.props
+const title = `新しい記事（${page}ページ目）｜${BLOG_NAME}`
+const description = `${BLOG_NAME}の記事一覧、${total}ページ中の${page}ページ目です。`
+const path = `${BLOG_PATH}page/${page}/`
+---
+
+<BaseLayout title={title} description={description} schema={listSchema(title, description, path, posts, [{ name: `${page}ページ目`, url: `${SITE}${path}` }])} cta={{ from: 'blog' }}>
+  <div class="wrap page-end">
+    <header class="page-head">
+      <Breadcrumbs items={[{ label: `${page}ページ目` }]} />
+      <h1 class="page-title">新しい記事<small class="page-no">{page} / {total}ページ</small></h1>
+      <CategoryNav posts={all} />
+    </header>
+    <section class="section" aria-label="記事">
+      <ul class="cards">
+        {posts.map((post, i) => <PostCard post={post} eager={i < 4} heading="h2" />)}
+      </ul>
+      <Pages current={page} total={total} />
+    </section>
+  </div>
+</BaseLayout>

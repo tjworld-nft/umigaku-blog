@@ -1,387 +1,141 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { getPost, getPosts } from '../lib/sanityClient'
-import { NOINDEX } from '../lib/seoExclusions'
-import { toHTML } from '@portabletext/to-html'
-import { generateSEOData } from '../lib/seoGenerator'
-import { detectTags, extractTextFromPortableText, getTagColor } from '../lib/autoTagger'
-import { calculateReadingTimeFromPortableText, formatReadingTime } from '../lib/readingTime'
+import Breadcrumbs from '../components/Breadcrumbs.astro'
+import PostCard from '../components/PostCard.astro'
+import AuthorBox from '../components/AuthorBox.astro'
+import Ask from '../components/Ask.astro'
+import Share from '../components/Share.astro'
 import RelatedManga from '../components/RelatedManga.astro'
+import { getListedPosts, getPosts } from '../lib/posts'
+import { getCategory } from '../lib/categories'
+import { relatedPosts } from '../lib/related'
 import { pickRelatedManga } from '../lib/relatedManga'
+import { postSchema } from '../lib/schema'
+import { ASK } from '../lib/ask'
+import { imageUrl, srcset } from '../lib/image'
+import { AUTHOR, BLOG_PATH, BRAND, SITE, formatDate, monthOf } from '../lib/site'
 import type { Post } from '../types/Post'
 
 export async function getStaticPaths() {
   const posts = await getPosts()
-  return posts.map((post: Post) => ({
-    params: { slug: post.slug },
-  }))
+  return posts.map((post) => ({ params: { slug: post.slug }, props: { post } }))
 }
 
-const { slug } = Astro.params
-
-let post: Post | null = null
-let error = ''
-
-try {
-  post = await getPost(slug)
-  if (!post) {
-    error = '記事が見つかりません'
-  }
-} catch (err) {
-  error = '記事の取得に失敗しました'
-  console.error('Error fetching post:', err)
+interface Props {
+  post: Post
 }
+const { post } = Astro.props
+const category = getCategory(post.category)
+const categoryUrl = `${BLOG_PATH}category/${category.id}/`
 
-// 画像URLを生成する関数
-function getImageUrl(imageRef: string, projectId: string, dataset: string) {
-  return `https://cdn.sanity.io/images/${projectId}/${dataset}/${imageRef.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp')}`
-}
+const listed = await getListedPosts()
+const related = relatedPosts(post, listed, 3)
+const manga = pickRelatedManga(post.title, post.bodyText)
 
-// 日付フォーマット関数
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString('ja-JP', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
+// 前後の記事（一覧に出している記事の時系列。listed は新しい順）
+const index = listed.findIndex((p) => p.slug === post.slug)
+const newer = index > 0 ? listed[index - 1] : undefined
+const older = index >= 0 ? listed[index + 1] : undefined
 
-// Portable Text を HTML に変換
-let bodyHTML = post?.body ? toHTML(post.body, {
-  components: {
-    types: {
-      image: ({ value }) => {
-        const imageUrl = value.asset?.url
-        return `<img src="${imageUrl || ''}" alt="${value.alt || ''}" class="w-full h-auto rounded-lg my-4" />`
-      }
-    }
-  }
-}) : ''
+// 目次は h2 が3つ以上ある記事にだけ出す（短い記事では、目次のぶん本文が遠くなるだけ）。8行まで。
+const toc = post.headings.filter((h) => h.level === 2)
+const showToc = toc.length >= 3
 
-// 読みやすさのため、長い文章に改行を追加と「」問題の根本修正
-if (bodyHTML) {
-  bodyHTML = bodyHTML
-    // 「」の前のあらゆる改行・空白・HTMLタグパターンを完全除去
-    .replace(/([！？。])\s*<\/p>\s*<p[^>]*>\s*」/g, '$1」')
-    .replace(/([^。！？])\s*<\/p>\s*<p[^>]*>\s*」/g, '$1」')
-    .replace(/\s*<br\s*\/?>\s*<br\s*\/?>\s*」/g, '」')
-    .replace(/\s*<br\s*\/?>\s*」/g, '」')
-    .replace(/\s*<\/p>\s*<p[^>]*>\s*」/g, '」')
-    .replace(/\n\s*」/g, '」')
-    .replace(/\s+」/g, '」')
-    // 洗練されたプレミアム見出しデザイン
-    .replace(/<h2>/g, '<h2 class="group relative text-3xl lg:text-4xl font-bold mb-12 mt-16 text-gray-900 leading-tight tracking-wide transition-all duration-300 hover:text-indigo-700 cursor-default">')
-    .replace(/<\/h2>/g, '<div class="absolute -bottom-3 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-200 to-transparent"></div><div class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-indigo-500 rounded-full opacity-60 group-hover:opacity-100 group-hover:scale-125 transition-all duration-300"></div></h2>')
-    // モダンでクリーンなh3デザイン  
-    .replace(/<h3>/g, '<h3 class="text-xl lg:text-2xl font-semibold mb-8 mt-12 text-gray-800 leading-relaxed tracking-wide relative pl-6 transition-all duration-300 hover:text-teal-700">')
-    .replace(/<\/h3>/g, '<div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-full shadow-md"></div></h3>')
-    // 読みやすさを重視した自然な改行処理
-    .replace(/([。！？」])(\s*)([^」「<\s].{20,})/g, '$1<br><br>$2$3') // 長い文章が続く場合のみ改行
-    .replace(/([。！？」])(\s*)([^」「<\s].{0,19}[。！？」])/g, '$1 $2$3') // 短い文は改行せずスペースで区切り
-    .replace(/。(\s*(?:また|そして|しかし|ただし|ちなみに|実は|例えば|つまり|なお))/g, '。<br><br>$1') // 接続詞の前で改行
-    .replace(/」(\s*(?:そんな|この|そういった|このような|あの|その))/g, '」<br><br>$1') // 指示語の前で改行
-    .replace(/([。！？」])<br><br>(\s*<\/p>)/g, '$1$2') // pタグ終了前の余分な改行を削除
-    .replace(/\s{2,}/g, ' ') // 連続する空白を単一に
-}
-
-// SEOデータを自動生成
-const seoData = post ? generateSEOData(post.title, post.body || []) : null
-
-// 自動タグ生成
-let autoTags: string[] = []
-let readingTime = 1
-let relatedManga: ReturnType<typeof pickRelatedManga> = []
-if (post) {
-  const bodyText = extractTextFromPortableText(post.body || [])
-  autoTags = detectTags(post.title, bodyText)
-  readingTime = calculateReadingTimeFromPortableText(post.body || [])
-  // 本体サイトの解説まんがから関連話を最大2つ（記事末尾に出す）
-  relatedManga = pickRelatedManga(post.title, bodyText)
-}
-
-const pageTitle = seoData ? seoData.ogTitle : '記事が見つかりません'
-// 記事が description を持っていればそれを使う。持たない過去記事は
-// 本文冒頭を切り出す自動生成にフォールバックする。
-const pageDescription = post?.description?.trim() || (seoData ? seoData.metaDescription : '')
-// SEOキーワードにタグを追加
-const baseKeywords = seoData ? seoData.keywords : []
-const allKeywords = [...baseKeywords, ...autoTags].join(', ')
-const pageImage = post?.mainImage?.asset?.url
-const datePublished = post?.publishedAt || post?._createdAt
-// 手動設定した公開日よりCMSの更新日が古い記事もあるため、前後を揃える。
-const dateModified = post?._updatedAt && datePublished &&
-  Date.parse(post._updatedAt) > Date.parse(datePublished)
-  ? post._updatedAt
-  : datePublished
+// アイキャッチは元の縦横比のまま出す（お客さんや生き物の写真が多く、切り抜くと頭が切れる）
+const HERO_WIDTHS = [480, 720, 960, 1360]
+const HERO_SIZES = '(min-width: 720px) 680px, calc(100vw - 2.5rem)'
+const hero = post.image
+const heroRatio = hero?.w && hero?.h ? hero.w / hero.h : 4 / 3
+const heroWidth = hero ? Math.min(hero.w ?? 1360, 1360) : 0
 ---
 
-<BaseLayout 
-  title={pageTitle} 
-  description={pageDescription}
-  keywords={allKeywords}
-  image={pageImage}
+<BaseLayout
+  title={`${post.title}｜${BRAND}`}
+  ogTitle={post.title}
+  description={post.description}
+  image={hero?.url}
   type="article"
-  datePublished={datePublished}
-  dateModified={dateModified}
-  tags={autoTags}
-  robots={post && NOINDEX.has(post.slug) ? 'noindex, follow' : undefined}
+  datePublished={post.date}
+  dateModified={post.updated}
+  section={category.name}
+  robots={post.noindex ? 'noindex, follow' : undefined}
+  schema={postSchema(post)}
+  preload={hero ? { href: imageUrl(hero.url, { w: 720 }), srcset: srcset(hero, HERO_WIDTHS), sizes: HERO_SIZES } : undefined}
+  cta={{ from: `blog-${category.id}`, watch: '#contact' }}
 >
-  {error || !post ? (
-    <div class="text-center py-12">
-      <p class="text-red-600 text-lg mb-4">{error || '記事が見つかりません'}</p>
-      <a href="/blog/" class="text-blue-600 hover:underline">
-        ホームに戻る
-      </a>
-    </div>
-  ) : (
-    <>
-      <article class="article-card rounded-lg shadow-lg overflow-hidden">
-        {post.mainImage && (
-          <div class="aspect-video bg-gray-200">
-            <img
-              src={post.mainImage.asset.url}
-              alt={post.title}
-              class="w-full h-full object-cover"
-            />
-          </div>
-        )}
-        
-        <div class="p-4 sm:p-6 lg:p-8">
-          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-            {post.title}
-          </h1>
-          
-          <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-gray-600 text-sm mb-6 sm:mb-8">
-            <time datetime={post.publishedAt || post._createdAt}>
-              {formatDate(post.publishedAt || post._createdAt)}
-            </time>
-            <span class="flex items-center gap-1">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              {formatReadingTime(readingTime)}
-            </span>
-          </div>
-
-          <div class="prose max-w-none mx-auto readable-content" set:html={bodyHTML}>
-          </div>
-
-          <!-- 自動タグ表示 -->
-          {autoTags.length > 0 && (
-            <div class="mt-8 pt-6 border-t border-gray-200">
-              <p class="text-gray-600 font-medium mb-3">タグ</p>
-              <div class="flex flex-wrap gap-2">
-                {autoTags.map(tag => (
-                  <span
-                    class="inline-block px-3 py-1 text-sm font-medium text-white rounded-full"
-                    style={`background-color: ${getTagColor(tag)}`}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          <!-- 関連するまんが（本体サイト /manga/ への導線） -->
-          <RelatedManga episodes={relatedManga} />
-
-          <!-- SNSシェアボタン -->
-          <div class="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-gray-200">
-            <p class="text-gray-600 font-medium mb-3 sm:mb-4">この記事をシェア</p>
-            <div class="flex flex-wrap gap-2 sm:gap-3">
-              <!-- X (Twitter) -->
-              <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(`https://miura-diving.com/blog/${post.slug}/`)}&via=miurakaigaku`}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="group inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 text-sm"
-              >
-                <svg class="w-5 h-5 group-hover:scale-110 transition-transform duration-300" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                </svg>
-                X
-              </a>
-              
-              <!-- Facebook -->
-              <a
-                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://miura-diving.com/blog/${post.slug}/`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="group inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105"
-              >
-                <svg class="w-5 h-5 group-hover:scale-110 transition-transform duration-300" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-                Facebook
-              </a>
-              
-              <!-- Instagram -->
-              <a
-                href={`https://www.instagram.com/`}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="group inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105"
-                title="Instagramで三浦海の学校をフォロー"
-              >
-                <svg class="w-5 h-5 group-hover:scale-110 transition-transform duration-300" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12.017 0C8.396 0 7.989.013 7.041.048 6.094.082 5.52.204 5.036.389a5.985 5.985 0 0 0-2.174 1.413A5.947 5.947 0 0 0 .449 4.176C.264 4.66.142 5.234.108 6.181.073 7.129.06 7.536.06 11.157s.013 4.028.048 4.976c.034.947.156 1.521.341 2.005a5.985 5.985 0 0 0 1.413 2.174 5.947 5.947 0 0 0 2.174 1.413c.484.185 1.058.307 2.005.341.948.035 1.355.048 4.976.048s4.028-.013 4.976-.048c.947-.034 1.521-.156 2.005-.341a5.985 5.985 0 0 0 2.174-1.413 5.947 5.947 0 0 0 1.413-2.174c.185-.484.307-1.058.341-2.005.035-.948.048-1.355.048-4.976s-.013-4.028-.048-4.976c-.034-.947-.156-1.521-.341-2.005a5.985 5.985 0 0 0-1.413-2.174A5.947 5.947 0 0 0 19.229.389C18.745.204 18.171.082 17.224.048 16.276.013 15.869 0 12.248 0h-.23zm-.117 2.164c3.596 0 4.024.013 5.457.048.879.04 1.358.187 1.677.31.421.163.722.358 1.038.673.315.315.51.617.673 1.038.123.319.27.798.31 1.677.035 1.433.048 1.861.048 5.457s-.013 4.024-.048 5.457c-.04.879-.187 1.358-.31 1.677-.163.421-.358.722-.673 1.038a2.79 2.79 0 0 1-1.038.673c-.319.123-.798.27-1.677.31-1.433.035-1.861.048-5.457.048s-4.024-.013-5.457-.048c-.879-.04-1.358-.187-1.677-.31a2.79 2.79 0 0 1-1.038-.673 2.79 2.79 0 0 1-.673-1.038c-.123-.319-.27-.798-.31-1.677-.035-1.433-.048-1.861-.048-5.457s.013-4.024.048-5.457c.04-.879.187-1.358.31-1.677.163-.421.358-.722.673-1.038.315-.315.617-.51 1.038-.673.319-.123.798-.27 1.677-.31 1.433-.035 1.861-.048 5.457-.048z"/>
-                  <path d="M12.017 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12.017 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
-                  <circle cx="18.406" cy="5.594" r="1.44"/>
-                </svg>
-                Instagram
-              </a>
-            </div>
-          </div>
+  <article class="post">
+    <header class="post-head">
+      <Breadcrumbs items={[{ label: category.name, href: categoryUrl }]} />
+      <p class="post-meta">
+        <a class="cat-link" href={categoryUrl}>{category.name}</a>
+        <span>
+          <time datetime={post.date}>{formatDate(post.date)}</time>
+          {post.showUpdated && <>（<time datetime={post.updated}>{formatDate(post.updated)}</time> 更新）</>}
+        </span>
+        <span>約{post.minutes}分</span>
+      </p>
+      <h1 class="post-title">{post.title}</h1>
+      <p class="byline">
+        <img src={`${BLOG_PATH}author-yoshida.webp`} alt="" width="36" height="36" decoding="async" />
+        <span><a href={AUTHOR.url}>{AUTHOR.name}</a>｜{AUTHOR.role}</span>
+      </p>
+      {post.lead && <p class="post-lead">{post.lead}</p>}
+      {hero && (
+        <div class:list={['post-hero', { 'post-hero--tall': heroRatio < 0.95 }]}>
+          <img
+            src={imageUrl(hero.url, { w: 720 })}
+            srcset={srcset(hero, HERO_WIDTHS)}
+            sizes={HERO_SIZES}
+            width={heroWidth}
+            height={Math.round(heroWidth / heroRatio)}
+            alt={post.imageAlt}
+            fetchpriority="high"
+            decoding="async"
+            style={hero.bg ? `background-color:${hero.bg}` : undefined}
+          />
         </div>
-      </article>
+      )}
+      {post.dated && (
+        <p class="post-note">
+          この記事は{monthOf(post.date)}に書いたものです。開催場所や料金、講習の進め方は、いまと違うところがあります。いまの内容は
+          {ASK[post.category].links.slice(0, 1).map((l) => <a href={`${SITE}${l.href}`}>{l.label}</a>)}
+          のページをご覧ください。
+        </p>
+      )}
+      {showToc && (
+        <nav class="toc" aria-label="この記事の内容">
+          <b>この記事の内容</b>
+          <ol>
+            {toc.slice(0, 8).map((h) => <li><a href={`#${h.id}`}>{h.text}</a></li>)}
+          </ol>
+        </nav>
+      )}
+    </header>
 
-      <div class="mt-8 text-center">
-        <a
-          href="/blog/"
-          class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          記事一覧に戻る
-        </a>
-      </div>
-    </>
-  )}
+    <div class="post-body">
+      <div class="prose" set:html={post.html} />
+    </div>
+
+    <footer class="post-foot">
+      <Ask category={post.category} />
+      <AuthorBox />
+      {related.length > 0 && (
+        <section aria-labelledby="related-title">
+          <h2 id="related-title" class="block-title">同じ話題の記事</h2>
+          <ul class="cards">
+            {related.map((p) => <PostCard post={p} showCategory={false} />)}
+          </ul>
+          <p class="foot-more"><a class="link-arrow" href={categoryUrl}>「{category.name}」の記事一覧</a></p>
+        </section>
+      )}
+      <RelatedManga episodes={manga} />
+      <Share title={post.title} url={`${SITE}${post.url}`} />
+      {(newer || older) && (
+        <nav class="pager" aria-label="前後の記事">
+          {older && <a class="prev" href={older.url}><small>前の記事</small>{older.title}</a>}
+          {newer && <a class="next" href={newer.url}><small>次の記事</small>{newer.title}</a>}
+        </nav>
+      )}
+    </footer>
+  </article>
 </BaseLayout>
-
-<style>
-  /* 記事カードの背景 */
-  .article-card {
-    background: rgba(255,255,255,0.95) !important;
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(173,216,230,0.4);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-  }
-
-  /* 読みやすさを向上させた記事スタイル */
-  .readable-content {
-    font-size: 1.125rem;
-    line-height: 1.8;
-    color: #374151;
-  }
-
-  .readable-content p {
-    margin-top: 1.8em;
-    margin-bottom: 1.8em;
-    line-height: 1.9;
-    white-space: pre-line; /* 改行文字を反映 */
-    color: #1f2937;
-  }
-
-  /* 句読点や「。」の後に改行スペースを追加 */
-  .readable-content p::after {
-    content: "";
-    display: block;
-    height: 0.8em;
-  }
-
-  .readable-content h1 {
-    color: #111827 !important;
-    font-weight: 800;
-    font-size: 2.5rem;
-    margin-top: 2.5em;
-    margin-bottom: 1.2em;
-    line-height: 1.3;
-  }
-
-  .readable-content h2 {
-    color: #111827 !important;
-    font-weight: 700;
-    font-size: 1.8rem;
-    margin-top: 3em;
-    margin-bottom: 1.5em;
-    line-height: 1.4;
-    padding-top: 1em;
-    border-top: 2px solid #e5e7eb;
-  }
-
-  .readable-content h3 {
-    color: #111827 !important;
-    font-weight: 600;
-    font-size: 1.4rem;
-    margin-top: 2.5em;
-    margin-bottom: 1.2em;
-    line-height: 1.5;
-  }
-
-  .readable-content h4, .readable-content h5, .readable-content h6 {
-    color: #111827 !important;
-    font-weight: 600;
-    margin-top: 2em;
-    margin-bottom: 1em;
-    line-height: 1.6;
-  }
-
-  .readable-content ul, .readable-content ol {
-    margin-top: 1.8em;
-    margin-bottom: 1.8em;
-    padding-left: 1.5em;
-  }
-
-  .readable-content li {
-    margin-top: 0.8em;
-    margin-bottom: 0.8em;
-    line-height: 1.8;
-    color: #1f2937;
-  }
-
-  .readable-content blockquote {
-    border-left: 4px solid #3b82f6;
-    padding-left: 1.5em;
-    margin: 2.5em 0;
-    font-style: italic;
-    background: #f8fafc;
-    padding: 1.5em;
-    border-radius: 8px;
-    color: #475569;
-  }
-
-  .readable-content img {
-    margin-top: 3em;
-    margin-bottom: 3em;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-  }
-
-  .readable-content a {
-    color: #2563eb !important;
-    text-decoration: underline;
-    text-underline-offset: 4px;
-  }
-
-  .readable-content a:hover {
-    color: #1d4ed8 !important;
-    text-decoration: none;
-  }
-
-  .readable-content code {
-    background: #f1f5f9;
-    color: #475569;
-    padding: 0.2em 0.4em;
-    border-radius: 4px;
-    font-size: 0.9em;
-  }
-
-  .readable-content pre {
-    background: #1e293b;
-    color: #e2e8f0;
-    padding: 1.5em;
-    border-radius: 8px;
-    margin: 2em 0;
-    overflow-x: auto;
-  }
-
-  .readable-content strong, .readable-content b {
-    font-weight: 700;
-    color: #111827;
-  }
-
-  .readable-content em, .readable-content i {
-    font-style: italic;
-    color: #374151;
-  }
-</style>

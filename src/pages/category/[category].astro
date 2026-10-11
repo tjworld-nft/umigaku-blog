@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import Breadcrumbs from '../../components/Breadcrumbs.astro'
+import CategoryNav from '../../components/CategoryNav.astro'
+import PostCard from '../../components/PostCard.astro'
+import Ask from '../../components/Ask.astro'
+import { getListedPosts } from '../../lib/posts'
+import { CATEGORIES, type Category } from '../../lib/categories'
+import { categorySchema } from '../../lib/schema'
+import { BLOG_NAME } from '../../lib/site'
+import type { Post } from '../../types/Post'
+
+export async function getStaticPaths() {
+  const posts = await getListedPosts()
+  // 記事が1本も無いカテゴリのページは作らない
+  return CATEGORIES.filter((c) => posts.some((p) => p.category === c.id)).map((category) => ({
+    params: { category: category.id },
+    props: { category, posts: posts.filter((p) => p.category === category.id), all: posts },
+  }))
+}
+
+interface Props {
+  category: Category
+  posts: Post[]
+  all: Post[]
+}
+const { category, posts, all } = Astro.props
+// 「まず読む」は手で選んだ記事（src/lib/categories.ts の featured）。残りは新しい順。
+const featured = category.featured.map((slug) => posts.find((p) => p.slug === slug)).filter((p): p is Post => Boolean(p))
+const rest = posts.filter((p) => !featured.includes(p))
+---
+
+<BaseLayout
+  title={`${category.name}｜${BLOG_NAME}`}
+  description={category.lead}
+  schema={categorySchema(category, posts)}
+  cta={{ from: `blog-${category.id}`, watch: '#contact' }}
+>
+  <div class="wrap page-end">
+    <header class="page-head">
+      <Breadcrumbs items={[{ label: category.name }]} />
+      <h1 class="page-title">{category.name}</h1>
+      <p class="page-lead">{category.lead}</p>
+      <CategoryNav posts={all} current={category.id} />
+    </header>
+
+    {featured.length > 0 && (
+      <section class="section" aria-labelledby="featured-title">
+        <div class="section-head"><h2 id="featured-title" class="section-title">まず読む</h2></div>
+        <ul class="cards">
+          {featured.map((post) => <PostCard post={post} eager showCategory={false} />)}
+        </ul>
+      </section>
+    )}
+
+    <section class="section" aria-labelledby="all-title">
+      <div class="section-head"><h2 id="all-title" class="section-title">{featured.length > 0 ? '新しい順' : `${category.name}の記事`}</h2></div>
+      <ul class="cards">
+        {rest.map((post, i) => <PostCard post={post} eager={featured.length === 0 && i < 4} showCategory={false} />)}
+      </ul>
+    </section>
+
+    <div class="section narrow">
+      <Ask category={category.id} />
+    </div>
+  </div>
+</BaseLayout>

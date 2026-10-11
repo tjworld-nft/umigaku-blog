@@ -1,0 +1,16 @@
+---
+// 「書いた人」。書いてある内容は本体サイトのインストラクター紹介と同じ事実だけ。
+import { AUTHOR, BLOG_PATH } from '../lib/site'
+---
+
+<aside class="author" aria-labelledby="author-name">
+  <img src={`${BLOG_PATH}author-yoshida.webp`} alt="" width="112" height="112" loading="lazy" decoding="async" />
+  <div>
+    <b>書いた人</b>
+    <h2 id="author-name">{AUTHOR.name}<small>{AUTHOR.role}</small></h2>
+    <p>
+      1997年にオーストラリアでプロダイバーの資格を取り、それから講習を続けています。三浦の海は約14年。このブログは、その日の海と講習の様子を現場から書いています。
+    </p>
+    <a class="link-arrow" href={AUTHOR.url}>インストラクター紹介</a>
+  </div>
+</aside>

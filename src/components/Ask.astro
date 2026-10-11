@@ -1,0 +1,40 @@
+---
+// 記事・カテゴリの下の「相談の帯」。本体サイトの下層ページの終わり方（.ask）と同じ役割。
+// 中身（見出し・つなぐ先）は src/lib/ask.ts。下の4行は本体の相談帯と同じ事実。
+import { ASK } from '../lib/ask'
+import { getCategory, type CategoryId } from '../lib/categories'
+import { LINE_URL, SITE } from '../lib/site'
+
+interface Props {
+  category: CategoryId
+}
+const { category } = Astro.props
+const ask = ASK[category]
+const form = `${SITE}/contact/?from=blog-${category}&category=${encodeURIComponent(getCategory(category).formCategory)}`
+---
+
+<section class="ask" id="contact" aria-labelledby="ask-title">
+  <h2 id="ask-title">{ask.title}</h2>
+  <p>{ask.text}</p>
+  <div class="ask-actions">
+    <a class="btn-line" href={LINE_URL} target="_blank" rel="noopener noreferrer">
+      <span class="line-mark"><svg aria-hidden="true"><use href="#i-line" /></svg></span>LINEで相談する
+    </a>
+    <a class="btn-outline" href={form}>フォームで問い合わせる</a>
+  </div>
+  <ul class="ask-links">
+    {ask.links.map((link) => (
+      <li>
+        <a href={`${SITE}${link.href}`}>
+          <span>{link.label}{link.sub && <small>{link.sub}</small>}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+  <ul class="ask-info">
+    <li><svg aria-hidden="true"><use href="#i-clock" /></svg>営業時間 9:00〜16:00（不定休）</li>
+    <li><svg aria-hidden="true"><use href="#i-train" /></svg>京急三崎口駅から無料送迎（要予約）</li>
+    <li><svg aria-hidden="true"><use href="#i-pin" /></svg>開催場所・集合場所はご予約時にご案内</li>
+    <li><svg aria-hidden="true"><use href="#i-cal" /></svg>キャンセルは前日17時まで無料</li>
+  </ul>
+</section>

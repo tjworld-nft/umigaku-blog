@@ -1,0 +1,43 @@
+---
+// 記事カード。スマホは「小さな写真＋題名」の行、広い画面は写真が上のカード。
+// 抜粋・読む時間・「続きを読む」ボタンは出さない（題名が十分に長く、1画面に見える本数を優先した）。
+import type { Post } from '../types/Post'
+import { getCategory } from '../lib/categories'
+import { imageUrl, srcset } from '../lib/image'
+import { formatDate } from '../lib/site'
+
+interface Props {
+  post: Post
+  /** 最初の画面に入るカードは true（遅延読み込みしない） */
+  eager?: boolean
+  /** カテゴリのページでは、同じ名前が並ぶだけなので出さない */
+  showCategory?: boolean
+  heading?: 'h2' | 'h3'
+}
+const { post, eager = false, showCategory = true, heading: H = 'h3' } = Astro.props
+const RATIO = 4 / 3
+---
+
+<li class="card">
+  <a href={post.url}>
+    <div class="card-thumb" style={post.image?.bg ? `background-color:${post.image.bg}` : undefined}>
+      {post.image && (
+        <img
+          src={imageUrl(post.image.url, { w: 448, ratio: RATIO, q: 68 })}
+          srcset={srcset(post.image, [224, 336, 448, 720], RATIO, 68)}
+          sizes="(min-width: 768px) 340px, 112px"
+          width="448"
+          height="336"
+          alt=""
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+        />
+      )}
+    </div>
+    <div>
+      {showCategory && <span class="card-cat">{getCategory(post.category).name}</span>}
+      <H class="card-title">{post.title}</H>
+      <time class="card-date" datetime={post.date}>{formatDate(post.date)}</time>
+    </div>
+  </a>
+</li>
