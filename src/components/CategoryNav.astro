@@ -1,0 +1,22 @@
+---
+// カテゴリの入口（一覧・カテゴリページの上に置く）。記事が1本も無いカテゴリは出さない。
+import type { Post } from '../types/Post'
+import { CATEGORIES, type CategoryId } from '../lib/categories'
+import { BLOG_PATH } from '../lib/site'
+
+interface Props {
+  posts: Post[]
+  current?: CategoryId | 'all'
+}
+const { posts, current } = Astro.props
+const used = new Set(posts.map((p) => p.category))
+---
+
+<nav class="cat-nav" aria-label="カテゴリ">
+  <ul>
+    <li><a href={BLOG_PATH} aria-current={current === 'all' ? 'page' : undefined}>新しい記事</a></li>
+    {CATEGORIES.filter((c) => used.has(c.id)).map((c) => (
+      <li><a href={`${BLOG_PATH}category/${c.id}/`} aria-current={current === c.id ? 'page' : undefined}>{c.name}</a></li>
+    ))}
+  </ul>
+</nav>

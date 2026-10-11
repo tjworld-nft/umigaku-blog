@@ -8,19 +8,17 @@
     "preview": "astro preview",
     "astro": "astro",
     "deploy": "node scripts/deploy.js",
-    "build:deploy": "npm run build && npm run deploy"
+    "build:deploy": "npm run build && npm run deploy",
+    "check:body": "esbuild scripts/check-body.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/check-body.mjs --log-level=warning && node node_modules/.cache/check-body.mjs"
   },
   "dependencies": {
     "@portabletext/to-html": "^2.0.14",
     "@sanity/client": "^7.6.0",
-    "@tailwindcss/typography": "^0.5.16",
-    "@tailwindcss/vite": "^4.1.11",
     "astro": "^5.10.1",
-    "dotenv": "^17.2.0",
-    "slugify": "^1.6.6",
-    "tailwindcss": "^4.1.11"
+    "dotenv": "^17.2.0"
   },
   "devDependencies": {
-    "ftp-deploy": "^2.4.7"
+    "ftp-deploy": "^2.4.7",
+    "esbuild": "^0.25.0"
   }
 }

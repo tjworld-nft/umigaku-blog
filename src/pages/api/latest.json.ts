@@ -1,34 +1,18 @@
-import type { APIRoute } from 'astro';
-import { getPosts } from '../../lib/sanityClient';
-import { REDIRECTED } from '../../lib/seoExclusions';
-import type { Post } from '../../types/Post';
+import type { APIRoute } from 'astro'
+import { getListedPosts } from '../../lib/posts'
+import { imageUrl } from '../../lib/image'
 
-type LatestPost = Omit<Post, 'mainImage'> & { mainImage?: { asset?: { url?: string } } };
-
+// 記事一覧のJSON（外から新着を読むための口）。形は以前と同じ（title / slug / excerpt / date / image）。
+// 写真だけ、元のままのURL（1枚数MB）ではなく幅800pxに縮めたURLを返す。
 export const GET: APIRoute = async () => {
-  try {
-    const posts: LatestPost[] = await getPosts(); // Sanity 内で publishedAt desc（全記事取得）
-    const latest = posts
-      .filter((p) => !REDIRECTED.has(p.slug))
-      .map((p) => ({
-        title: p.title,
-        slug:  p.slug,
-        excerpt: p.body?.[0]?.children?.[0]?.text ?? p.body?.[0]?.value ?? '',
-        date:  p.publishedAt?.substring(0,10) ?? p._createdAt?.substring(0,10),
-        image: p.mainImage?.asset?.url ?? '',
-      }));
-    
-    return new Response(JSON.stringify(latest), {
-      headers: { 
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=300'  // 5分キャッシュ
-      }
-    });
-  } catch (error) {
-    console.error('Error fetching posts:', error);
-    return new Response(JSON.stringify([]), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-};
+  const latest = (await getListedPosts()).map((p) => ({
+    title: p.title,
+    slug: p.slug,
+    excerpt: p.description,
+    date: p.date.slice(0, 10),
+    image: p.image ? imageUrl(p.image.url, { w: 800, ratio: 3 / 2 }) : '',
+  }))
+  return new Response(JSON.stringify(latest), {
+    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=300' },
+  })
+}

@@ -1,0 +1,35 @@
+---
+// 記事を送る。以前は黒・青・紫の大きなボタンが3つ並び、「Instagram」は instagram.com の
+// トップへ飛ぶだけだった。文字のリンクにして、LINEで送る・リンクをコピー を入れた。
+interface Props {
+  title: string
+  url: string
+}
+const { title, url } = Astro.props
+const u = encodeURIComponent(url)
+const t = encodeURIComponent(title)
+---
+
+<p class="share">
+  <span>この記事を送る</span>
+  <a href={`https://social-plugins.line.me/lineit/share?url=${u}`} target="_blank" rel="noopener noreferrer">LINE</a>
+  <a href={`https://twitter.com/intent/tweet?text=${t}&url=${u}`} target="_blank" rel="noopener noreferrer">X</a>
+  <a href={`https://www.facebook.com/sharer/sharer.php?u=${u}`} target="_blank" rel="noopener noreferrer">Facebook</a>
+  <button type="button" data-copy={url}>リンクをコピー</button>
+  <span class="copied" role="status" aria-live="polite"></span>
+</p>
+
+<script is:inline>
+  document.querySelectorAll('.share [data-copy]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const status = button.parentElement.querySelector('.copied')
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy)
+        status.textContent = 'コピーしました'
+      } catch {
+        status.textContent = 'コピーできませんでした'
+      }
+      setTimeout(() => (status.textContent = ''), 2500)
+    })
+  })
+</script>

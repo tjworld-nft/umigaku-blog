@@ -1,0 +1,18 @@
+---
+// 一覧のページ送り（新しい記事 ←→ 前の記事）
+import { BLOG_PATH } from '../lib/site'
+interface Props {
+  current: number
+  total: number
+}
+const { current, total } = Astro.props
+const href = (n: number) => (n === 1 ? BLOG_PATH : `${BLOG_PATH}page/${n}/`)
+---
+
+{total > 1 && (
+  <nav class="pages" aria-label="ページ送り">
+    {current > 1 ? <a class="link-back" href={href(current - 1)}>新しい記事へ</a> : <span aria-hidden="true">新しい記事へ</span>}
+    <span>{current} / {total}</span>
+    {current < total ? <a class="link-arrow" href={href(current + 1)}>前の記事へ</a> : <span aria-hidden="true">前の記事へ</span>}
+  </nav>
+)}
