@@ -18,6 +18,23 @@ let cache: Promise<RawPost[]> | undefined
  * 以前はページごとに取り直していて、166ページのビルドに2分かかっていた。
  */
 export function getAllPosts(): Promise<RawPost[]> {
-  cache ??= client.fetch<RawPost[]>(POSTS_QUERY)
+  cache ??= client.fetch<RawPost[]>(POSTS_QUERY).then(applyDraftPatch)
   return cache
+}
+
+/**
+ * 手元の確認用。BLOG_PATCH_FILE に { slug: { title, description, body } } の JSON を指定すると、
+ * Sanity に書き込む前の手入れ案を重ねてビルドできる（記事の文章をまとめて直すときの下見）。
+ * 本番のビルド（GitHub Actions）では指定しないので、何も起きない。
+ */
+async function applyDraftPatch(posts: RawPost[]): Promise<RawPost[]> {
+  const file = import.meta.env.BLOG_PATCH_FILE
+  if (!file) return posts
+  const { readFile } = await import('node:fs/promises')
+  const patch = JSON.parse(await readFile(file, 'utf8')) as Record<string, Partial<RawPost>>
+  console.log(`[draft] ${Object.keys(patch).length}本の手入れ案を重ねています（${file}）`)
+  return posts.map((post) => {
+    const p = patch[post.slug]
+    return p ? { ...post, title: p.title ?? post.title, description: p.description ?? post.description, body: p.body ?? post.body } : post
+  })
 }
