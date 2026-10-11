@@ -61,7 +61,7 @@ export const CATEGORIES = [
   {
     id: 'news',
     name: 'お店から',
-    lead: '特典やアプリなど、三浦 海の学校からのお知らせです。',
+    lead: 'つづける割やバディ割などの特典、アプリ、サイトの新しい仕組みなど、三浦 海の学校からのお知らせです。',
     formCategory: 'その他',
     featured: [],
   },

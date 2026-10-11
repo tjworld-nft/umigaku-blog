@@ -76,17 +76,21 @@ export const SOCIAL = [
   { label: 'X', href: 'https://x.com/miura_diving', icon: 'x' },
 ]
 
+// 日付は UTC で切る（ビルドする機械のタイムゾーンに左右されないよう固定）。
+// 記事の日付は「書いた日の 09:00Z」で入れる決まり（投入スクリプト）なので、UTC でも日本時間でも同じ日になる。
+// 古い記事は Sanity の作成時刻を使っていて、日本時間で切ると22本が slug の日付・これまでの表示と1日ずれる。
+const DATE_ZONE = 'UTC'
+
 export function formatDate(iso: string): string {
-  // ビルド環境のタイムゾーンに左右されないよう、日本時間で固定する
-  return new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(iso))
+  return new Intl.DateTimeFormat('ja-JP', { timeZone: DATE_ZONE, year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(iso))
 }
 
 /** 年ごとにまとめるための「2026」 */
 export function yearOf(iso: string): string {
-  return new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric' }).format(new Date(iso)).replace('年', '')
+  return new Intl.DateTimeFormat('ja-JP', { timeZone: DATE_ZONE, year: 'numeric' }).format(new Date(iso)).replace('年', '')
 }
 
 /** 「2025年7月」の形 */
 export function monthOf(iso: string): string {
-  return new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: 'long' }).format(new Date(iso))
+  return new Intl.DateTimeFormat('ja-JP', { timeZone: DATE_ZONE, year: 'numeric', month: 'long' }).format(new Date(iso))
 }

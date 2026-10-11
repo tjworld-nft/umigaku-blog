@@ -567,9 +567,6 @@ button.btn-outline {
 .prose h2 + h3 {
   margin-top: 1.4em;
 }
-.prose :is(h2, h3, h4) {
-  scroll-margin-top: calc(var(--hdr) + 16px);
-}
 .prose a {
   color: var(--teal-ink);
   text-decoration: underline;
