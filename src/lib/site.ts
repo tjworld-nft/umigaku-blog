@@ -85,6 +85,7 @@ export const FOOTER_KNOW = [
   { label: 'PADIとは（コースの順番）', href: '/padi/' },
   { label: 'Cカード（ダイビングライセンス）とは', href: '/c-card/' },
   { label: '三浦の海の水温（月別）', href: '/sea-conditions/' },
+  { label: 'ダイビング用語集', href: '/glossary/' },
 ]
 
 export const SOCIAL = [
