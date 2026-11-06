@@ -3,7 +3,7 @@
 // メニューの中身は src/lib/site.ts、見た目は src/styles/blog.css。
 import '../styles/blog.css'
 import Icons from '../components/Icons.astro'
-import { BLOG_DESCRIPTION, BLOG_NAME, BLOG_PATH, BRAND, FOOTER_NAV, LINE_URL, MOBILE_NAV, NAV, SITE, SOCIAL } from '../lib/site'
+import { BLOG_DESCRIPTION, BLOG_NAME, BLOG_PATH, BRAND, FOOTER_AREA, FOOTER_NAV, LINE_URL, MOBILE_NAV, NAV, SITE, SOCIAL } from '../lib/site'
 import { imageUrl } from '../lib/image'
 
 export interface Props {
@@ -180,6 +180,12 @@ const year = new Date().getFullYear()
             <p class="footer-feed"><a href={`${BLOG_PATH}rss.xml`}>ブログの更新（RSS）</a></p>
           </div>
         </div>
+        <nav class="footer-area" aria-label="エリア・ポイントから探す" style="margin:2rem auto 0;max-width:980px;text-align:center;font-size:.85rem;line-height:1.9;color:rgba(255,255,255,.78)">
+          <p style="margin:0 0 .25rem;color:#fff;font-weight:700">エリア・ポイントから探す</p>
+          {FOOTER_AREA.map((item) => (
+            <a href={abs(item.href)} style="display:inline-block;margin:0 .55em;color:inherit;text-decoration:underline;text-underline-offset:2px">{item.label}</a>
+          ))}
+        </nav>
         <div class="footer-bottom">
           <p>&copy; {year} {BRAND} All rights reserved.｜神奈川県三浦市・三浦半島のダイビングスクール</p>
           <p>運営：<a href="https://aquabit-lab.com/" target="_blank" rel="noopener">AquaBit LAB</a></p>

@@ -70,6 +70,16 @@ export const FOOTER_NAV = [
   { label: 'プライバシーポリシー', href: '/privacy-policy/' },
 ]
 
+/** フッターの「エリア・ポイントから探す」（本体と同じ6本・2026-11 SEO第1弾） */
+export const FOOTER_AREA = [
+  { label: '東京からダイビングライセンス', href: '/tokyo-diving-license/' },
+  { label: '横浜からダイビングライセンス', href: '/yokohama-diving-license/' },
+  { label: '神奈川でダイビングライセンス', href: '/kanagawa-diving-license/' },
+  { label: '横須賀からダイビング', href: '/yokosuka-diving/' },
+  { label: '城ヶ島・梶の浜ビーチ', href: '/diving-point/jogashima-kajinohama/' },
+  { label: '宮川湾ボートダイビング', href: '/diving-point/miyagawa-bay/' },
+]
+
 export const SOCIAL = [
   { label: 'Instagram', href: 'https://www.instagram.com/tj_official_umigaku/', icon: 'ig' },
   { label: 'Facebook', href: 'https://www.facebook.com/miuraumigaku/', icon: 'fb' },
