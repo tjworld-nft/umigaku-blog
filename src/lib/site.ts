@@ -73,7 +73,7 @@ export const FOOTER_NAV = [
 export const SOCIAL = [
   { label: 'Instagram', href: 'https://www.instagram.com/tj_official_umigaku/', icon: 'ig' },
   { label: 'Facebook', href: 'https://www.facebook.com/miuraumigaku/', icon: 'fb' },
-  { label: 'X', href: 'https://x.com/miura_diving', icon: 'x' },
+  { label: 'X', href: 'https://x.com/mumigaku', icon: 'x' },
 ]
 
 // 日付は UTC で切る（ビルドする機械のタイムゾーンに左右されないよう固定）。
