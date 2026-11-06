@@ -80,6 +80,13 @@ export const FOOTER_AREA = [
   { label: '宮川湾ボートダイビング', href: '/diving-point/miyagawa-bay/' },
 ]
 
+/** フッターの「ダイビングの基礎知識」（本体と同じ並び・2026-11 SEO第2弾。本体に知識のページを足したらここにも足す） */
+export const FOOTER_KNOW = [
+  { label: 'PADIとは（コースの順番）', href: '/padi/' },
+  { label: 'Cカード（ダイビングライセンス）とは', href: '/c-card/' },
+  { label: '三浦の海の水温（月別）', href: '/sea-conditions/' },
+]
+
 export const SOCIAL = [
   { label: 'Instagram', href: 'https://www.instagram.com/tj_official_umigaku/', icon: 'ig' },
   { label: 'Facebook', href: 'https://www.facebook.com/miuraumigaku/', icon: 'fb' },
