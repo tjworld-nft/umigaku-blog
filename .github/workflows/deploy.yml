@@ -50,6 +50,8 @@ jobs:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
+        # 通信を暗号化する（FTPS）。暗号化なしの FTP ではパスワードがそのまま流れるため。
+        protocol: ftps
         local-dir: ./dist/
         server-dir: /miura-diving.com/public_html/blog/
         log-level: verbose
