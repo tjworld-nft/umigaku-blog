@@ -248,7 +248,7 @@ const year = new Date().getFullYear()
         // 相談シート（本体サイトの /js/ask.js を借りる）。data-ask つきの「空きを聞く」ボタンを押すと、
         // コース・日にち・人数をえらぶだけで送る文面ができる画面をひらく。読めなければ、今までどおりLINEへ進む。
         // ⚠ 本体の js/ask.js の番号を上げたら、下の V も合わせる（本体の AGENTS.md「相談シート」）。
-        const V = '2026111402'
+        const V = '2026111403'
         const COURSE = { '体験ダイビング': 'trial', 'OWDライセンス': 'license', 'AOWライセンス': 'step', 'ファンダイビング': 'fun', 'リフレッシュ': 'refresh', 'マリンアクティビティ': 'snorkel' }
         if (!(window.HTMLDialogElement && document.createElement('dialog').showModal)) return
         let loading = null
