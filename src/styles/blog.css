@@ -959,7 +959,7 @@ button.btn-outline {
   object-fit: cover;
 }
 .card-cat {
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 700;
   line-height: 1.4;
   color: var(--teal-ink);
