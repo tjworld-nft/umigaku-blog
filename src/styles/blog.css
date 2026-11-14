@@ -1367,3 +1367,15 @@ button.btn-outline {
     display: none !important;
   }
 }
+
+/* ---------- ページを移るときの動き（本体サイトの css/style.css と同じ決まり・対応ブラウザだけ） ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+}
+.site-header { view-transition-name: site-header; }
+::view-transition { background: #EAF4F8; }
+::view-transition-old(root) { animation: vt-old .24s cubic-bezier(.4, 0, 1, 1) both; }
+::view-transition-new(root) { animation: vt-new .46s cubic-bezier(.16, .84, .3, 1) both; }
+::view-transition-group(site-header) { animation-duration: .3s; }
+@keyframes vt-old { to { opacity: 0; transform: translateY(-12px); } }
+@keyframes vt-new { from { opacity: 0; transform: translateY(20px); } }

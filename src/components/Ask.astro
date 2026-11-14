@@ -10,14 +10,15 @@ interface Props {
 }
 const { category } = Astro.props
 const ask = ASK[category]
-const form = `${SITE}/contact/?from=blog-${category}&category=${encodeURIComponent(getCategory(category).formCategory)}`
+const formCategory = getCategory(category).formCategory
+const form = `${SITE}/contact/?from=blog-${category}&category=${encodeURIComponent(formCategory)}#form`
 ---
 
-<section class="ask" id="contact" aria-labelledby="ask-title">
+<section class="ask" id="contact" aria-labelledby="ask-title" data-ask-cat={formCategory}>
   <h2 id="ask-title">{ask.title}</h2>
   <p>{ask.text}</p>
   <div class="ask-actions">
-    <a class="btn-line" href={LINE_URL} target="_blank" rel="noopener noreferrer">
+    <a class="btn-line" href={LINE_URL} target="_blank" rel="noopener noreferrer" data-ask="ask">
       <span class="line-mark"><svg aria-hidden="true"><use href="#i-line" /></svg></span>LINEで相談する
     </a>
     <a class="btn-outline" href={form}>フォームで問い合わせる</a>
