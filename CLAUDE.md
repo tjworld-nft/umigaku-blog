@@ -214,6 +214,12 @@ Sanity の画像CDNに幅・形式（`auto=format`）・画質を指定する。
 - 本体の `.htaccess` が、転送する記事の301と `/blog` の除外を持っている。
 - 記事の書き方・投入は、本体リポジトリのスキル `blog-post`（`.claude/skills/blog-post/`）。
   書き方の決まりは同スキルの `references/writing-rules.md`。
+- **相談シート（2026-11-14）**：ヘッダーの「予約・相談」・メニューとスマホ下のバーのLINE・記事の下の相談帯のLINE
+  （`data-ask` のついたボタン）を押すと、本体の `/js/ask.js` を借りて「コース・いつごろ・人数をえらぶだけで文面ができる」
+  シートが開く。つなぎは `src/layouts/BaseLayout.astro` の末尾の小さなスクリプト（コースは相談帯の `data-ask-cat` から）。
+  読み込めなければ、今までどおり LINE（lin.ee）へ進む。**本体で `js/ask.js` の番号（`?v=`）を上げたら、
+  このスクリプトの `V` も同じ番号に上げる**（サーバーが7日キャッシュするため）。フォームへのリンクは `#form` つき。
+- ページを移るときの動き（View Transitions）は `src/styles/blog.css` の末尾。本体の `css/style.css` と同じ書き方。
 
 ---
 
