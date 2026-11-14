@@ -115,7 +115,7 @@ const year = new Date().getFullYear()
 
     {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
   </head>
-  <body>
+  <body data-ask-from={cta?.from ?? 'blog'}>
     <a class="skip" href="#main">本文へ移動</a>
     <Icons />
 
@@ -126,7 +126,7 @@ const year = new Date().getFullYear()
           {NAV.map((item) => (
             <a href={abs(item.href)} aria-current={item.current ? 'page' : undefined}>{item.label}</a>
           ))}
-          <a href={LINE_URL} class="nav-cta" target="_blank" rel="noopener noreferrer">
+          <a href={LINE_URL} class="nav-cta" target="_blank" rel="noopener noreferrer" data-ask="nav">
             <svg class="ico" aria-hidden="true"><use href="#i-line" /></svg>予約・相談
           </a>
         </nav>
@@ -142,10 +142,10 @@ const year = new Date().getFullYear()
           <a href={abs(item.href)} aria-current={item.current ? 'page' : undefined}>{item.label}</a>
         ))}
         <div class="mobile-nav-cta">
-          <a href={LINE_URL} class="btn-line" target="_blank" rel="noopener noreferrer">
+          <a href={LINE_URL} class="btn-line" target="_blank" rel="noopener noreferrer" data-ask="nav">
             <span class="line-mark"><svg aria-hidden="true"><use href="#i-line" /></svg></span>LINEで空きを聞く
           </a>
-          <a href={`${SITE}/contact/?from=blog-nav`} class="btn-outline">予約・お問い合わせフォーム</a>
+          <a href={`${SITE}/contact/?from=blog-nav#form`} class="btn-outline">予約・お問い合わせフォーム</a>
         </div>
       </nav>
     </div>
@@ -201,10 +201,10 @@ const year = new Date().getFullYear()
 
     {cta && (
       <div class="mobile-cta-bar is-hidden" role="navigation" aria-label="予約・お問い合わせ" data-watch={cta.watch}>
-        <a class="cta-line" href={LINE_URL} target="_blank" rel="noopener noreferrer">
+        <a class="cta-line" href={LINE_URL} target="_blank" rel="noopener noreferrer" data-ask="bar">
           <svg aria-hidden="true"><use href="#i-line" /></svg>LINEで空きを聞く
         </a>
-        <a class="cta-form" href={`${SITE}/contact/?from=${cta.from}-bar`}>
+        <a class="cta-form" href={`${SITE}/contact/?from=${cta.from}-bar#form`}>
           <svg aria-hidden="true"><use href="#i-mail" /></svg>予約フォーム
         </a>
       </div>
@@ -243,6 +243,46 @@ const year = new Date().getFullYear()
         nav.addEventListener('click', (e) => { if (e.target === nav || e.target.closest('a')) set(false) })
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && nav.classList.contains('is-open')) { set(false); button.focus() } })
         matchMedia('(min-width: 1200px)').addEventListener('change', (e) => { if (e.matches) set(false) })
+      })()
+      ;(() => {
+        // 相談シート（本体サイトの /js/ask.js を借りる）。data-ask つきの「空きを聞く」ボタンを押すと、
+        // コース・日にち・人数をえらぶだけで送る文面ができる画面をひらく。読めなければ、今までどおりLINEへ進む。
+        // ⚠ 本体の js/ask.js の番号を上げたら、下の V も合わせる（本体の AGENTS.md「相談シート」）。
+        const V = '20261114'
+        const COURSE = { '体験ダイビング': 'trial', 'OWDライセンス': 'license', 'AOWライセンス': 'step', 'ファンダイビング': 'fun', 'リフレッシュ': 'refresh', 'マリンアクティビティ': 'snorkel' }
+        if (!(window.HTMLDialogElement && document.createElement('dialog').showModal)) return
+        let loading = null
+        const load = () => {
+          if (window.UmiAsk) return Promise.resolve(window.UmiAsk)
+          if (loading) return loading
+          loading = new Promise((resolve, reject) => {
+            const s = document.createElement('script')
+            s.src = '/js/ask.js?v=' + V
+            s.async = true
+            s.onload = () => (window.UmiAsk ? resolve(window.UmiAsk) : reject(new Error('ask')))
+            s.onerror = () => { loading = null; reject(new Error('ask')) }
+            document.head.appendChild(s)
+          })
+          return loading
+        }
+        const trigger = (e) => e.target.closest && e.target.closest('a[data-ask]')
+        document.addEventListener('click', (e) => {
+          if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+          const a = trigger(e)
+          if (!a) return
+          e.preventDefault()
+          const band = document.querySelector('[data-ask-cat]')
+          const ctx = {
+            course: COURSE[(band && band.dataset.askCat) || ''] || '',
+            from: (document.body.dataset.askFrom || 'blog') + '-' + (a.dataset.ask || 'btn'),
+            msg: '',
+          }
+          const href = a.href
+          load().then((api) => { if (!api.open(ctx)) location.href = href }, () => { location.href = href })
+        }, true)
+        const warm = (e) => { if (trigger(e)) load().catch(() => {}) }
+        document.addEventListener('pointerover', warm, { passive: true })
+        document.addEventListener('touchstart', warm, { passive: true })
       })()
     </script>
   </body>
