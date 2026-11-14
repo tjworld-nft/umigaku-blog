@@ -247,6 +247,23 @@ a {
 .hamburger.is-open span:nth-child(3) {
   transform: rotate(-45deg) translate(5px, -5px);
 }
+/* メニューを開いている間は、ヘッダーをメニューの上に出す（右上の「×」で閉じられるように）。
+   前は、× が白いメニューの面の下に隠れて、見えも押せもしなかった（ヘッダーの重なり順 1000 ＜ メニュー 1050）。
+   ヘッダーの帯は透明にして、ロゴは隠す。帯そのものは、下のメニューを押すじゃまをしない。本体サイト（css/style.css）と同じ決まり。 */
+.nav-open .site-header {
+  z-index: 1100;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  pointer-events: none;
+}
+.nav-open .site-header .header-logo {
+  visibility: hidden;
+}
+.nav-open .site-header .hamburger {
+  pointer-events: auto;
+}
 .mobile-nav {
   position: fixed;
   inset: 0;
