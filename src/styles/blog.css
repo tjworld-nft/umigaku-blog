@@ -878,6 +878,43 @@ button.btn-outline {
   margin-top: 1rem;
 }
 
+/* 毎朝7時の1本（インスタ・Facebook の案内。書いた人の下。2026-11-18） */
+.daily-reel {
+  padding: 1.2rem 1.3rem 1.3rem;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: var(--bg-tint);
+}
+.daily-reel h2 {
+  font-size: 1.08rem;
+  line-height: 1.5;
+}
+.daily-reel p {
+  margin-top: 0.35rem;
+  font-size: 0.88rem;
+  line-height: 1.8;
+  color: var(--text-sub);
+}
+.daily-reel-btns {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+.daily-reel-btns .btn-outline {
+  font-size: 0.92rem;
+  padding: 0.75rem 1.2rem;
+}
+.daily-reel-btns .ico {
+  width: 1.15em;
+  height: 1.15em;
+}
+@media (min-width: 640px) {
+  .daily-reel-btns {
+    grid-template-columns: auto auto;
+    justify-content: start;
+  }
+}
+
 /* 送る（文字のリンクだけ。色つきの大きなボタンにしない） */
 .share {
   display: flex;
