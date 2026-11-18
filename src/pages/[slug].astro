@@ -6,6 +6,7 @@ import AuthorBox from '../components/AuthorBox.astro'
 import Ask from '../components/Ask.astro'
 import Share from '../components/Share.astro'
 import RelatedManga from '../components/RelatedManga.astro'
+import DailyReel from '../components/DailyReel.astro'
 import { getListedPosts, getPosts } from '../lib/posts'
 import { getCategory } from '../lib/categories'
 import { relatedPosts } from '../lib/related'
@@ -123,6 +124,7 @@ const heroWidth = hero ? Math.min(hero.w ?? 1360, 1360) : 0
     <footer class="post-foot">
       <Ask category={post.category} />
       <AuthorBox />
+      <DailyReel />
       {related.length > 0 && (
         <section aria-labelledby="related-title">
           <h2 id="related-title" class="block-title">同じ話題の記事</h2>

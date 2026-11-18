@@ -1,0 +1,19 @@
+---
+// 「毎朝7時、三浦の海から1本」の案内（Instagram・Facebook）。記事の本文ではなく枠で出す（2026-11-18）。
+// 「フォローして」とは書かない。毎朝7時に1本出ていることを知らせるだけ。
+const IG = 'https://www.instagram.com/tj_official_umigaku/'
+const FB = 'https://www.facebook.com/miuraumigaku'
+---
+
+<aside class="daily-reel" aria-labelledby="daily-reel-title">
+  <h2 id="daily-reel-title">毎朝7時、三浦の海から1本。</h2>
+  <p>写真の中に隠れた生き物を探したり、海の水を抜いたり。案内役はクララ。</p>
+  <div class="daily-reel-btns">
+    <a class="btn-outline" href={IG} target="_blank" rel="noopener">
+      <svg class="ico" aria-hidden="true"><use href="#i-ig" /></svg>Instagram で見る
+    </a>
+    <a class="btn-outline" href={FB} target="_blank" rel="noopener">
+      <svg class="ico" aria-hidden="true"><use href="#i-fb" /></svg>Facebook で見る
+    </a>
+  </div>
+</aside>
